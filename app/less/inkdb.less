@@ -59,20 +59,18 @@ body {
     height: 2em;
     background: white;
     cursor: pointer;
+    z-index: 1;
   }
 
-  h1 {
+  header {
     position: absolute;
     top: 0;
     width: 95%;
     background: white;
-  }
 
-  h2 {
-    position: absolute;
-    top: 2em;
-    width: 95%;
-    background: white;
+    h1, h2, p {
+      margin: 0.3em 0 0;
+    }
   }
 
   .inkpoint {
@@ -92,8 +90,30 @@ body {
     }
 
     &.selected {
-      border: 1px solid rgba(0,0,0,0.8);
       z-index: 10;
+      border: 1px solid rgba(0,0,0,0.8);
+      font-size: 100%;
+      font-family: Arial;
+
+      &:hover {
+        border: 1px solid rgba(0,0,0,0.8);
+        box-sizing: content-box;
+      }
+
+      &:before {
+        display: block;
+        position: absolute;
+        left: -0.14em;
+        top: -0.14em;
+        content: "-";
+        font-size: 500%;
+        color: transparent;
+        border: 1px dotted rgba(0,0,0,0.2);
+        border-radius: 1000px;
+        height: 0.5em;
+        width: 0.5em;
+        z-index: 1;
+      }
     }
   }
 }

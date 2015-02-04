@@ -83,23 +83,27 @@ var InkCloud = React.createClass({displayName: "InkCloud",
       if(entry.distance > max) { max = entry.distance; }
     });
 
+    var diff = max - min;
     var w = innerWidth/2;
     var h = innerHeight/2;
-    var xf = w / (max - min);
-    var yf = h / (max - min);
+    var xf = w / diff;
+    var yf = h / diff;
 
     var self = this;
     var elements = points.map(function(entry) {
       var x = xf * entry.distance * Math.cos(entry.angle),
           y = yf * entry.distance * Math.sin(entry.angle),
-          scale = 0.75 + 0.5 * (x+y)/(w+h);
+          xscale = 1.2 + -0.5 * entry.distance/diff;
 
       x = 50 * x/w;
       y = 40 * y/h;
 
+      var yscale = 1;//(y-20)/20;
+
+
       var style = {
         background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+scale+")"
+        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+(xscale*yscale)+")"
       };
 
       var realign = function(evt) {
@@ -130,8 +134,11 @@ var InkCloud = React.createClass({displayName: "InkCloud",
     return (
       React.createElement("div", {className: "inkcloud"}, 
         React.createElement("div", {className: "listlink", onClick: switchBack}, "Back to the list view"), 
-        React.createElement("h1", null, "Color distances in Fountain Pen land"), 
-        React.createElement("h2", {ref: "info"}), 
+        React.createElement("header", null, 
+          React.createElement("h1", null, "Color distances in Fountain Pen land"), 
+          React.createElement("p", null, "The closer a color is to the central color, the closer they are in L*a*b space."), 
+          React.createElement("h2", {ref: "info"})
+        ), 
         elements
       )
     );
