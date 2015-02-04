@@ -51,9 +51,18 @@ body {
 .inkcloud {
   padding-top: 15vh;
 
+  .listlink {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10em;
+    height: 2em;
+    background: white;
+    cursor: pointer;
+  }
+
   h1 {
     position: absolute;
-    cursor: pointer;
     top: 0;
     width: 95%;
     background: white;
@@ -72,6 +81,8 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 20px;
+
+    transition: all ease-in-out 0.5s;
 
     &:hover {
       border: 1px dotted black;

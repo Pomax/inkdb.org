@@ -20,14 +20,15 @@ var InkCloud = React.createClass({
     var self = this;
     var elements = points.map(function(entry) {
       var x = xf * entry.distance * Math.cos(entry.angle),
-          y = yf * entry.distance * Math.sin(entry.angle);
+          y = yf * entry.distance * Math.sin(entry.angle),
+          scale = 0.75 + 0.5 * (x+y)/(w+h);
 
       x = 50 * x/w;
       y = 40 * y/h;
 
       var style = {
         background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh)"
+        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+scale+")"
       };
 
       var realign = function(evt) {
@@ -57,7 +58,8 @@ var InkCloud = React.createClass({
 
     return (
       <div className="inkcloud">
-        <h1 onClick={switchBack}>Color distances in Fountain Pen land</h1>
+        <div className="listlink" onClick={switchBack}>Back to the list view</div>
+        <h1>Color distances in Fountain Pen land</h1>
         <h2 ref="info"></h2>
         {elements}
       </div>
