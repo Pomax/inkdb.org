@@ -213,18 +213,25 @@ var InkDB = React.createClass({displayName: "InkDB",
   },
 
   render: function() {
+    var linkback = React.createElement("div", {className: "Pomax"}, "By ", React.createElement("a", {href: "http://twitter.com/TheRealPomax"}, "Pomax"));
+    var maincontent;
     switch(this.state.mode) {
       case "cloud":
-        return React.createElement(InkCloud, {
-                  inks: this.state.inks, 
-                  inkClicked: this.inkClicked, 
-                  switchMode: this.switchMode}, "...");
+        maincontent = React.createElement(InkCloud, {
+          inks: this.state.inks, 
+          inkClicked: this.inkClicked, 
+          switchMode: this.switchMode}, "...");
+        break;
       default:
-        return React.createElement(InkListing, {
-                  inks: this.state.inks, 
-                  inkClicked: this.inkClicked, 
-                  switchMode: this.switchMode}, "...");
+        maincontent = React.createElement(InkListing, {
+          inks: this.state.inks, 
+          inkClicked: this.inkClicked, 
+          switchMode: this.switchMode}, "...");
     }
+    return (React.createElement("div", null, 
+      linkback, 
+      maincontent
+    ));
   },
 
   switchMode: function(mode) {

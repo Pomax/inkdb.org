@@ -62,18 +62,25 @@ var InkDB = React.createClass({
   },
 
   render: function() {
+    var linkback = <div className="Pomax">By <a href="http://twitter.com/TheRealPomax">Pomax</a></div>;
+    var maincontent;
     switch(this.state.mode) {
       case "cloud":
-        return <InkCloud
-                  inks={this.state.inks}
-                  inkClicked={this.inkClicked}
-                  switchMode={this.switchMode}>...</InkCloud>;
+        maincontent = <InkCloud
+          inks={this.state.inks}
+          inkClicked={this.inkClicked}
+          switchMode={this.switchMode}>...</InkCloud>;
+        break;
       default:
-        return <InkListing
-                  inks={this.state.inks}
-                  inkClicked={this.inkClicked}
-                  switchMode={this.switchMode}>...</InkListing>;
+        maincontent = <InkListing
+          inks={this.state.inks}
+          inkClicked={this.inkClicked}
+          switchMode={this.switchMode}>...</InkListing>;
     }
+    return (<div>
+      {linkback}
+      {maincontent}
+    </div>);
   },
 
   switchMode: function(mode) {
