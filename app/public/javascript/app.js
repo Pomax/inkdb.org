@@ -213,7 +213,10 @@ var InkDB = React.createClass({displayName: "InkDB",
   },
 
   render: function() {
-    var linkback = React.createElement("div", {className: "Pomax"}, "By ", React.createElement("a", {href: "http://twitter.com/TheRealPomax"}, "Pomax"));
+    var linkback = (React.createElement("div", {className: "Pomax"}, 
+      "By ", React.createElement("a", {href: "http://twitter.com/TheRealPomax"}, "Pomax"), "," + ' ' +
+      "code ", React.createElement("a", {href: "http://github.com/Pomax/inkdb.org"}, "here")
+    ));
     var maincontent;
     switch(this.state.mode) {
       case "cloud":
