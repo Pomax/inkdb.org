@@ -93,7 +93,7 @@ var InkCloud = React.createClass({displayName: "InkCloud",
     var elements = points.map(function(entry) {
       var x = xf * entry.distance * Math.cos(entry.angle),
           y = yf * entry.distance * Math.sin(entry.angle),
-          xscale = 1.2 + -0.5 * entry.distance/diff;
+          xscale = 1 + -0.4 * entry.distance/diff;
 
       x = 50 * x/w;
       y = 40 * y/h;
