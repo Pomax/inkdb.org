@@ -20,34 +20,26 @@ var InkCloud = React.createClass({
 
     var self = this;
     var elements = points.map(function(entry) {
+
       var x = xf * entry.distance * Math.cos(entry.angle),
           y = yf * entry.distance * Math.sin(entry.angle),
-          xscale = 1 + -0.4 * entry.distance/diff;
+          xscale = 1 + -0.4 * entry.distance/diff,
+          realign = function(evt) {
+            evt.stopPropagation();
+            self.realign(entry);
+          },
+          className = "inkpoint" + (entry.distance === 0 ? " selected" : ""),
+          label = entry.company + " " + entry.inkname,
+          showInfo = function(evt) {
+            self.refs.info.getDOMNode().innerHTML = label;
+          };
 
       x = 50 * x/w;
       y = 40 * y/h;
 
-      var yscale = 1;//(y-20)/20;
-
-
       var style = {
         background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+(xscale*yscale)+")"
-      };
-
-      var realign = function(evt) {
-        evt.stopPropagation();
-        self.props.inkClicked(entry);
-      };
-
-      var className = "inkpoint";
-
-      if (entry.distance === 0) {
-        className += " selected";
-      }
-
-      var showInfo = function(evt) {
-        self.refs.info.getDOMNode().innerHTML = entry.company + " " + entry.inkname;
+        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
       };
 
       return <div className={className}
@@ -62,7 +54,6 @@ var InkCloud = React.createClass({
 
     return (
       <div className="inkcloud">
-        <div className="listlink" onClick={switchBack}>Back to the list view</div>
         <header>
           <h1>Color distances in Fountain Pen land</h1>
           <p>The closer a color is to the central color, the closer they are in L*a*b space.</p>
@@ -72,6 +63,10 @@ var InkCloud = React.createClass({
       </div>
     );
   },
+
+  realign: function(entry) {
+    this.props.inkClicked(entry);
+  }
 
 });
 

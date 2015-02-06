@@ -12,10 +12,11 @@ var Ink = React.createClass({
         b = this.state.b,
         c = this.state.L < 0.3 ? "white" : "black",
         bstyle = { background: "rgb("+r+","+g+","+b+")", color: c },
-        imgSrc = "inks/images/" + this.state.images + "/crop.png";
+        imgSrc = "inks/images/" + this.state.images + "/crop.png",
+        className = "ink swatch" + (this.state.selected ? " selected" : "");
 
     return (
-      <div className="ink swatch" onClick={this.inkClicked}>
+      <div className={className} onClick={this.inkClicked}>
         <div className="ink color preview" style={bstyle}>
           {this.entryContent()}
           <img src={imgSrc} className="ink crop image" />

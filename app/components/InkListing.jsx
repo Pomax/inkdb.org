@@ -33,14 +33,14 @@ var InkListing = React.createClass({
             filter company: <input
               type="text"
               onChange={this.setCompanyFilter}
-              placeHolder="type text here" />
+              placeholder="type text here" />
           </span>
 
           <span>
             filter name: <input
               type="text"
               onChange={this.setNameFilter}
-              placeHolder="type text here" />
+              placeholder="type text here" />
           </span>
         </div>
 
@@ -60,6 +60,22 @@ var InkListing = React.createClass({
         </div>
       </div>
     );
+  },
+
+  componentDidMount: function() {
+    this.scrollTo();
+  },
+
+  componentDidUpdate: function() {
+    this.scrollTo();
+  },
+
+  scrollTo: function() {
+    var position = document.querySelector(".selected.ink.swatch");
+    if(position) {
+      position = position.getBoundingClientRect().top - 100;
+      scrollTo(0, position)
+    }
   },
 
   buildListing: function(list) {

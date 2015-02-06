@@ -1,15 +1,20 @@
 var React = require("react");
-var InkListing = require("./InkListing.jsx");
-var InkCloud = require("./InkCloud.jsx");
 var request = require("superagent");
 var chroma = require("chroma-js");
+
+
+var ViewSelector = require("./ViewSelector.jsx");
+var InkListing = require("./InkListing.jsx");
+var InkCloud = require("./InkCloud.jsx");
+
 
 var InkDB = React.createClass({
 
   getInitialState: function() {
     return {
+      currentEntry: {},
       inks: {all:[], darks: [], neutrals: [], colors: []},
-      mode: "listing"
+      mode: "grid"
     };
   },
 
@@ -18,7 +23,6 @@ var InkDB = React.createClass({
   },
 
   processInks: function(err, data) {
-    console.log("loaded");
     data = JSON.parse(data.text);
     var inks = [],
         darks = [],
@@ -62,10 +66,16 @@ var InkDB = React.createClass({
   },
 
   render: function() {
+
     var linkback = (<div className="Pomax">
       By <a href="http://twitter.com/TheRealPomax">Pomax</a>,
       code <a href="http://github.com/Pomax/inkdb.org">here</a>
     </div>);
+
+    var viewer = (
+      <ViewSelector ref="selector" mode={this.state.mode} changeViewMode={this.switchMode} />
+    );
+
     var maincontent;
     switch(this.state.mode) {
       case "cloud":
@@ -74,14 +84,17 @@ var InkDB = React.createClass({
           inkClicked={this.inkClicked}
           switchMode={this.switchMode}>...</InkCloud>;
         break;
+      case "grid":
       default:
         maincontent = <InkListing
           inks={this.state.inks}
           inkClicked={this.inkClicked}
           switchMode={this.switchMode}>...</InkListing>;
     }
+
     return (<div>
       {linkback}
+      {viewer}
       {maincontent}
     </div>);
   },
@@ -89,7 +102,17 @@ var InkDB = React.createClass({
   switchMode: function(mode) {
     this.setState({
       mode: mode
+    }, function() {
+      this.refs.selector.setMode(mode);
     })
+  },
+
+  setCurrentEntry: function(entry) {
+    this.state.currentEntry.selected = false;
+    entry.selected = true;
+    this.setState({
+      currentEntry: entry
+    });
   },
 
   inkClicked: function(entry) {
@@ -108,6 +131,7 @@ var InkDB = React.createClass({
       entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0])/180;
     });
     this.switchMode("cloud");
+    this.setCurrentEntry(entry);
   },
 
 });
