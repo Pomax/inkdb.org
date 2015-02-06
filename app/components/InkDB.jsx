@@ -100,11 +100,12 @@ var InkDB = React.createClass({
     </div>);
   },
 
-  switchMode: function(mode) {
+  switchMode: function(mode, callback) {
     this.setState({
       mode: mode
     }, function() {
       this.refs.selector.setMode(mode);
+      if(callback) callback();
     })
   },
 
@@ -134,8 +135,10 @@ var InkDB = React.createClass({
       entry.distance = distance;
       entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0])/180;
     });
-    this.switchMode("cloud");
-    this.setCurrentEntry(entry);
+    var self = this;
+    this.switchMode("cloud", function() {
+      self.setCurrentEntry(entry);
+    });
   },
 
 });
