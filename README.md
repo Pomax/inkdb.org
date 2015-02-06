@@ -2,7 +2,7 @@
 
 And exploration in mixing React with inkcyclopedia.org, showing the 380+ fountain pen inks that I've written with so far, in a hopefully visually interesting manner.
 
-Visit https://mighty-lake-2303.herokuapp.com to see this exploration in action.
+Visit https://mighty-lake-2303.herokuapp.com to see this exploration in action, or head over to http://pomax.github.io/#gh-weblog-1423203721895 to read the blog post on the work so far.
 
 Right now there are two views:
 
