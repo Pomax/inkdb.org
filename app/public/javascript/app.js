@@ -266,7 +266,7 @@ var InkDB = React.createClass({displayName: "InkDB",
   },
 
   inkClicked: function(entry) {
-    if(entry.selected) {
+    if(this.state.mode === "cloud" && entry.selected) {
       return this.switchMode("grid");
     }
     var ref = chroma(entry.r, entry.g, entry.b, 'rgb');
