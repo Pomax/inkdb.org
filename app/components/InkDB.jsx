@@ -67,29 +67,30 @@ var InkDB = React.createClass({
 
   render: function() {
 
+    var viewer = (
+      <ViewSelector ref="selector" mode={this.state.mode} changeViewMode={this.switchMode} />
+    );
+
     var linkback = (<div className="Pomax">
       By <a href="http://twitter.com/TheRealPomax">Pomax</a>,
       code <a href="http://github.com/Pomax/inkdb.org">here</a>
     </div>);
 
-    var viewer = (
-      <ViewSelector ref="selector" mode={this.state.mode} changeViewMode={this.switchMode} />
-    );
+    var props = {
+      inks: this.state.inks,
+      inkClicked: this.inkClicked,
+      switchMode: this.switchMode
+    };
 
     var maincontent;
+
     switch(this.state.mode) {
       case "cloud":
-        maincontent = <InkCloud
-          inks={this.state.inks}
-          inkClicked={this.inkClicked}
-          switchMode={this.switchMode}>...</InkCloud>;
+        maincontent = <InkCloud {...props} />;
         break;
       case "grid":
       default:
-        maincontent = <InkListing
-          inks={this.state.inks}
-          inkClicked={this.inkClicked}
-          switchMode={this.switchMode}>...</InkListing>;
+        maincontent = <InkListing {...props} />;
     }
 
     return (<div>
@@ -116,6 +117,9 @@ var InkDB = React.createClass({
   },
 
   inkClicked: function(entry) {
+    if(entry.selected) {
+      return this.switchMode("grid");
+    }
     var ref = chroma(entry.r, entry.g, entry.b, 'rgb');
     var inks = this.state.inks.all;
     inks.forEach(function(entry) {

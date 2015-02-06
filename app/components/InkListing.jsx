@@ -29,12 +29,16 @@ var InkListing = React.createClass({
             </select>
           </span>
 
+          &nbsp;
+
           <span>
             filter company: <input
               type="text"
               onChange={this.setCompanyFilter}
               placeholder="type text here" />
           </span>
+
+          &nbsp;
 
           <span>
             filter name: <input

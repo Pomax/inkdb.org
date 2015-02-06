@@ -34,12 +34,12 @@ var InkCloud = React.createClass({
             self.refs.info.getDOMNode().innerHTML = label;
           };
 
-      x = 50 * x/w;
-      y = 40 * y/h;
+      x = 50 * x/w - 1.5;
+      y = 40 * y/h - 7;
 
       var style = {
         background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
+        transform: "translate(50vw, 45vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
       };
 
       return <div className={className}
@@ -59,7 +59,9 @@ var InkCloud = React.createClass({
           <p>The closer a color is to the central color, the closer they are in L*a*b space.</p>
           <h2 ref="info"></h2>
         </header>
-        {elements}
+        <div className="cloud">
+          {elements}
+        </div>
       </div>
     );
   },

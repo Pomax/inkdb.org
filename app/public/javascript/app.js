@@ -106,12 +106,12 @@ var InkCloud = React.createClass({displayName: "InkCloud",
             self.refs.info.getDOMNode().innerHTML = label;
           };
 
-      x = 50 * x/w;
-      y = 40 * y/h;
+      x = 50 * x/w - 1.5;
+      y = 40 * y/h - 7;
 
       var style = {
         background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 40vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
+        transform: "translate(50vw, 45vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
       };
 
       return React.createElement("div", {className: className, 
@@ -131,7 +131,9 @@ var InkCloud = React.createClass({displayName: "InkCloud",
           React.createElement("p", null, "The closer a color is to the central color, the closer they are in L*a*b space."), 
           React.createElement("h2", {ref: "info"})
         ), 
-        elements
+        React.createElement("div", {className: "cloud"}, 
+          elements
+        )
       )
     );
   },
@@ -214,29 +216,30 @@ var InkDB = React.createClass({displayName: "InkDB",
 
   render: function() {
 
+    var viewer = (
+      React.createElement(ViewSelector, {ref: "selector", mode: this.state.mode, changeViewMode: this.switchMode})
+    );
+
     var linkback = (React.createElement("div", {className: "Pomax"}, 
       "By ", React.createElement("a", {href: "http://twitter.com/TheRealPomax"}, "Pomax"), "," + ' ' +
       "code ", React.createElement("a", {href: "http://github.com/Pomax/inkdb.org"}, "here")
     ));
 
-    var viewer = (
-      React.createElement(ViewSelector, {ref: "selector", mode: this.state.mode, changeViewMode: this.switchMode})
-    );
+    var props = {
+      inks: this.state.inks,
+      inkClicked: this.inkClicked,
+      switchMode: this.switchMode
+    };
 
     var maincontent;
+
     switch(this.state.mode) {
       case "cloud":
-        maincontent = React.createElement(InkCloud, {
-          inks: this.state.inks, 
-          inkClicked: this.inkClicked, 
-          switchMode: this.switchMode}, "...");
+        maincontent = React.createElement(InkCloud, React.__spread({},  props));
         break;
       case "grid":
       default:
-        maincontent = React.createElement(InkListing, {
-          inks: this.state.inks, 
-          inkClicked: this.inkClicked, 
-          switchMode: this.switchMode}, "...");
+        maincontent = React.createElement(InkListing, React.__spread({},  props));
     }
 
     return (React.createElement("div", null, 
@@ -263,6 +266,9 @@ var InkDB = React.createClass({displayName: "InkDB",
   },
 
   inkClicked: function(entry) {
+    if(entry.selected) {
+      return this.switchMode("grid");
+    }
     var ref = chroma(entry.r, entry.g, entry.b, 'rgb');
     var inks = this.state.inks.all;
     inks.forEach(function(entry) {
@@ -317,12 +323,16 @@ var InkListing = React.createClass({displayName: "InkListing",
             )
           ), 
 
+          " ", 
+
           React.createElement("span", null, 
             "filter company: ", React.createElement("input", {
               type: "text", 
               onChange: this.setCompanyFilter, 
               placeholder: "type text here"})
           ), 
+
+          " ", 
 
           React.createElement("span", null, 
             "filter name: ", React.createElement("input", {
