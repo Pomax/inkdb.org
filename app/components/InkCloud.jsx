@@ -48,10 +48,6 @@ var InkCloud = React.createClass({
                   onClick={realign}></div>;
     });
 
-    var switchBack = function() {
-      self.props.switchMode("list");
-    };
-
     return (
       <div className="inkcloud">
         <header>

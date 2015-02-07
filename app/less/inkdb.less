@@ -27,52 +27,111 @@ body {
   z-index: 10;
 }
 
-.ink.swatch {
-  display: inline-block;
-  width: 22vw;
+.dropzone {
+  display: block;
+  width: 50%;
+  margin: auto;
   height: 8em;
-  background: white;
-  border: 1px solid grey;
-  margin: 0.2em;
-  vertical-align: top;
-  overflow: hidden;
-  cursor: pointer;
+  border: 3px dashed black;
+  padding: 10px;
 
-  &.selected {
-    background: #F8F2D2;
+  &:active {
+    background: lightgrey;
   }
 
-  .company {
-    font-weight: normal;
-    color: #666;
-    border-bottom: 1px solid;
-    vertical-align: 0.25em;
+  img {
+    display: inline-block;
+    max-height: 100%;
+    max-width: ~"calc(100% - 22em)";
+    border: 1px solid black;
+    vertical-align: middle;
   }
 
-  .inkname {
-    font-weight: bold;
-    color: #222;
-  }
-
-  .company + .inkname {
+  span {
+    display: inline-block;
+    vertical-align: middle;
     margin-left: 0.25em;
   }
 }
 
-.ink.color.preview {
-  position: relative;
-  height: 60%;
-  margin-bottom: 1em;
+.matching {
+  .palette {
+    margin-top: 2em;
+  }
+  .matches {
+    text-align: left;
+    width: 50%;
+    margin: auto;
+    margin-top: 2em;
+
+    .match {
+      position: relative;
+      margin-right: 2em;
+
+      &.row {
+        margin-top: 2px;
+        border-bottom: 1px solid grey;
+      }
+    }
+  }
 }
 
-.ink.crop.image {
-  position: absolute;
-  bottom: -10px;
-  right: 0;
-  height: 40px;
-  width: 40px;
-  border: 1px solid white;
-  border-width: 1px 0 0 1px;
+.ink {
+  &.color.preview {
+    position: relative;
+    height: 60%;
+    margin-bottom: 1em;
+  }
+
+  &.crop.image {
+    position: absolute;
+    bottom: -10px;
+    right: 0;
+    height: 40px;
+    width: 40px;
+    border: 1px solid white;
+    border-width: 1px 0 0 1px;
+  }
+
+  &.match {
+    display: inline-block;
+    width: 3em;
+    height: 2em;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 22vw;
+    height: 8em;
+    background: white;
+    border: 1px solid grey;
+    margin: 0.2em;
+    vertical-align: top;
+    overflow: hidden;
+    cursor: pointer;
+
+    &.selected {
+      background: #F8F2D2;
+    }
+
+    .company {
+      font-weight: normal;
+      color: #666;
+      border-bottom: 1px solid;
+      vertical-align: 0.25em;
+    }
+
+    .inkname {
+      font-weight: bold;
+      color: #222;
+    }
+
+    .company + .inkname {
+      margin-left: 0.25em;
+    }
+  }
 }
 
 .inkcloud {

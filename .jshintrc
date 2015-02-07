@@ -5,7 +5,9 @@
     "console": false,
     "module": false,
     "process": false,
-    "require": false
+    "require": false,
+    "innerWidth": false,
+    "innerHeight": false
   },
   "camelcase": true,
   "bitwise": true,
@@ -21,6 +23,5 @@
   "quotmark": true,
   "trailing": true,
   "undef": true,
-  "unused": "vars",
-  "maxlen": 80
+  "unused": "vars"
 }

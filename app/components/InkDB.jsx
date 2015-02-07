@@ -1,14 +1,16 @@
 var React = require("react");
-var request = require("superagent");
 var chroma = require("chroma-js");
-
 
 var ViewSelector = require("./ViewSelector.jsx");
 var InkListing = require("./InkListing.jsx");
 var InkCloud = require("./InkCloud.jsx");
-
+var InkMatch = require("./InkMatch.jsx");
 
 var InkDB = React.createClass({
+
+  mixins: [
+    require("../mixins/InkLoader")
+  ],
 
   getInitialState: function() {
     return {
@@ -16,53 +18,6 @@ var InkDB = React.createClass({
       inks: {all:[], darks: [], neutrals: [], colors: []},
       mode: "grid"
     };
-  },
-
-  componentDidMount: function() {
-    request.get("data.json").end(this.processInks);
-  },
-
-  processInks: function(err, data) {
-    data = JSON.parse(data.text);
-    var inks = [],
-        darks = [],
-        neutrals = [],
-        colors = [];
-    Object.keys(data).forEach(function(k) {
-      var entry = data[k],
-          H = entry.H,
-          S = entry.S,
-          L = entry.L;
-
-      (function(e) {
-        var r = parseInt(e.r,10);
-        var g = parseInt(e.g,10);
-        var b = parseInt(e.b,10);
-        var i = (r+g+b)/3;
-        e.i = i;
-        var sr = Math.abs(r-i);
-        var sg = Math.abs(g-i);
-        var sb = Math.abs(b-i);
-        e.spread = {
-          max: Math.max(sr,Math.max(sg,sb)),
-          min: Math.min(sr,Math.min(sg,sb)),
-        };
-      }(entry));
-
-      if(L < 0.08) { darks.push(entry); }
-      else if(L < 0.15 && S < 0.3) { darks.push(entry); }
-      else if(S < 0.09 || (S < 0.2 && L < 0.25)) { neutrals.push(entry); }
-      else { colors.push(entry); }
-      inks.push(entry);
-    });
-    this.setState({
-      inks: {
-        all: inks,
-        darks: darks,
-        neutrals: neutrals,
-        colors: colors
-      }
-    });
   },
 
   render: function() {
@@ -79,6 +34,7 @@ var InkDB = React.createClass({
     var props = {
       inks: this.state.inks,
       inkClicked: this.inkClicked,
+      alignInks: this.alignInks,
       switchMode: this.switchMode
     };
 
@@ -87,6 +43,9 @@ var InkDB = React.createClass({
     switch(this.state.mode) {
       case "cloud":
         maincontent = <InkCloud {...props} />;
+        break;
+      case "match":
+        maincontent = <InkMatch {...props} />;
         break;
       case "grid":
       default:
@@ -121,10 +80,18 @@ var InkDB = React.createClass({
     if(this.state.mode === "cloud" && entry.selected) {
       return this.switchMode("grid");
     }
-    var ref = chroma(entry.r, entry.g, entry.b, 'rgb');
+    var ref = chroma(entry.r, entry.g, entry.b, "rgb");
+    this.alignInks(ref);
+    var self = this;
+    this.switchMode("cloud", function() {
+      self.setCurrentEntry(entry);
+    });
+  },
+
+  alignInks: function(ref) {
     var inks = this.state.inks.all;
     inks.forEach(function(entry) {
-      var local = chroma(entry.r, entry.g, entry.b, 'rgb');
+      var local = chroma(entry.r, entry.g, entry.b, "rgb");
       var rc = ref.lab();
       var lc = local.lab();
       var distance = Math.sqrt(
@@ -135,11 +102,7 @@ var InkDB = React.createClass({
       entry.distance = distance;
       entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0])/180;
     });
-    var self = this;
-    this.switchMode("cloud", function() {
-      self.setCurrentEntry(entry);
-    });
-  },
+  }
 
 });
 

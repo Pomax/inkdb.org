@@ -5,7 +5,7 @@ var ViewSelector = React.createClass({
   getInitialState: function() {
     return {
       view: this.props.mode,
-      views: [ "grid", "cloud" ]
+      views: [ "grid", "cloud", "match" ]
     };
   },
 

@@ -43,6 +43,8 @@ gulp.task('minify-app', ['bundle-app'], function() {
 // used in both the lint and watch tasks
 var jsxSrc = [
   cwd + '/components/**/*.js*',
+  cwd + '/mixins/**/*.js',
+  '!' + cwd + '/lib/jpg.js',
   cwd + '/lib/**/*.js'
 ];
 
