@@ -1,3 +1,10 @@
+/**
+ * These values are not quite right... the transition from white
+ * to blue is way too abrupt, going from (255,255,252) to (255,251,255),
+ * ju,ping (0,-4/+3) in a single step where other steps only change single
+ * channels, by single increments/decrements... this code needs fixing.
+ */
+
 function clamp(x, min, max) {
   return x < min? min : x > max ? max : x;
 }

@@ -1,6 +1,6 @@
 var RGBQuant = require("rgbquant");
 var JpegImage = require("./jpg.js");
-var temperature = require("../lib/temperature");
+var chroma = require("chroma-js");
 
 var opts = {
   colors: 10,
@@ -8,29 +8,17 @@ var opts = {
   initColors: 256
 };
 
-module.exports = function inkmatch(dataURI, Kelvin, callback) {
-  if(typeof Kelvin === "function") {
-    callback = Kelvin;
-    Kelvin = false;
-  }
+module.exports = function inkmatch(dataURI, callback) {
 
   function performAnalysis(data, width, height) {
     data = data.data ? data.data : data;
-
-    if (Kelvin) {
-      var temp = temperature(Kelvin);
-      for(var i=0, l=data.length; i<l; i+=4) {
-        data[i]   = (data[i]   + temp[0])/2;
-        data[i+1] = (data[i+1] + temp[1])/2;
-        data[i+2] = (data[i+2] + temp[2])/2;
-        data[i+3] = 255;
-      }
-    }
-
     var quantizer = new RGBQuant(opts);
     quantizer.sample(data, width);
+    var pal = quantizer.palette(true, true).map(function(rgb) {
+      return chroma(rgb[0], rgb[1], rgb[2], "rgb");
+    });
     callback(false, {
-      pal: quantizer.palette(true, true),
+      pal: pal,
       data: data,
       crushed: quantizer.reduce(data),
       width: width,

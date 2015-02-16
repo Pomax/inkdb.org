@@ -1,9 +1,11 @@
 var request = require("superagent");
+var globalinks = false;
 
 var InkLoader = {
 
   componentDidMount: function() {
-    request.get("data.json").end(this.processInks);
+    if(globalinks) { this.setState({ inks: globalinks }); }
+    else { request.get("data.json").end(this.processInks); }
   },
 
   processInks: function(err, data) {
@@ -49,14 +51,14 @@ var InkLoader = {
       inks.push(entry);
     });
 
-    this.setState({
-      inks: {
-        all: inks,
-        darks: darks,
-        neutrals: neutrals,
-        colors: colors
-      }
-    });
+    globalinks = {
+      all: inks,
+      darks: darks,
+      neutrals: neutrals,
+      colors: colors
+    };
+
+    this.setState({ inks: globalinks });
   }
 
 };

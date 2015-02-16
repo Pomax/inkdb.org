@@ -29,9 +29,9 @@ body {
 
 .dropzone {
   display: block;
-  width: 50%;
+  width: 100px;
+  height: 100px;
   margin: auto;
-  height: 8em;
   border: 3px dashed black;
   padding: 10px;
 
@@ -58,20 +58,74 @@ body {
   .palette {
     margin-top: 2em;
   }
+  ul {
+    text-align: left;
+    width: 40em;
+    margin: auto;
+  }
   .matches {
     text-align: left;
     width: 50%;
     margin: auto;
     margin-top: 2em;
 
-    .match {
-      position: relative;
-      margin-right: 2em;
+    list-style: none;
 
-      &.row {
-        margin-top: 2px;
-        border-bottom: 1px solid grey;
+    .match {
+      .color {
+        width: 3em;
+        height: 1em;
+        display: inline-block;
+        margin-right: 0.5em;
+        cursor: pointer;
       }
+
+      border-bottom: 1px solid grey;
+      margin-bottom: 0.5em;
+    }
+  }
+  .imageeditor {
+    canvas {
+      display: block;
+      max-width: 400px;
+      max-height: 400px;
+      margin: auto;
+    }
+    .temperatures {
+      display: inline-block;
+      border: 1px solid black;
+      .temperature {
+        display: inline-block;
+        height: 1em;
+        width: 0.4em;
+        box-sizing: border-box;
+        &.selected {
+          border: solid black;
+          border-width: 0 1px;
+        }
+        &:hover {
+          border: solid grey;
+          border-width: 0 1px;
+        }
+        cursor: pointer;
+      }
+    }
+    button {
+      display: block;
+      width: 10em;
+      margin: auto;
+      &[hidden] {
+        opacity: 0.5;
+      }
+    }
+    .pal {
+      width: 3em;
+      height: 2em;
+      display: inline-block;
+      margin: 2px;
+      border-radius: 0.25em;
+      border: 1px solid grey;
+      cursor: pointer;
     }
   }
 }
