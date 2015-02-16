@@ -1,47 +1,60 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var React = require('react');
-var InkDB = require('./InkDB.jsx');
+"use strict";
 
-React.render(
-  React.createElement(InkDB, null),
-  document.getElementById('app')
-);
+var React = require("react");
+var InkDB = require("./InkDB.jsx");
 
-},{"./InkDB.jsx":4,"react":160}],2:[function(require,module,exports){
+React.render(React.createElement(InkDB, null), document.getElementById("app"));
+
+},{"./InkDB.jsx":4,"react":162}],2:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
 
-var Ink = React.createClass({displayName: "Ink",
+var Ink = React.createClass({
+  displayName: "Ink",
 
-  getInitialState: function() {
+
+  getInitialState: function () {
     return this.props.data;
   },
 
-  render: function() {
+  render: function () {
     var r = this.state.r,
         g = this.state.g,
         b = this.state.b,
         c = this.state.L < 0.3 ? "white" : "black",
-        bstyle = { background: "rgb("+r+","+g+","+b+")", color: c },
+        bstyle = { background: "rgb(" + r + "," + g + "," + b + ")", color: c },
         imgSrc = "inks/images/" + this.state.images + "/crop.png",
         className = "ink swatch" + (this.state.selected ? " selected" : "");
 
-    return (
-      React.createElement("div", {className: className, onClick: this.inkClicked}, 
-        React.createElement("div", {className: "ink color preview", style: bstyle}, 
-          this.entryContent(), 
-          React.createElement("img", {src: imgSrc, className: "ink crop image"})
-        ), 
-        React.createElement("span", {className: "company"}, this.state.company), 
-        React.createElement("span", {className: "inkname"}, this.state.inkname)
+    return React.createElement(
+      "div",
+      { className: className, onClick: this.inkClicked },
+      React.createElement(
+        "div",
+        { className: "ink color preview", style: bstyle },
+        this.entryContent(),
+        React.createElement("img", { src: imgSrc, className: "ink crop image" })
+      ),
+      React.createElement(
+        "span",
+        { className: "company" },
+        this.state.company
+      ),
+      React.createElement(
+        "span",
+        { className: "inkname" },
+        this.state.inkname
       )
     );
   },
 
-  inkClicked: function(evt) {
+  inkClicked: function (evt) {
     this.props.inkClicked(this);
   },
 
-  entryContent: function() {
+  entryContent: function () {
     // var H = (""+this.state.H).substring(0,5),
     //     S = (""+this.state.S).substring(0,5),
     //     L = (""+this.state.L).substring(0,5);
@@ -51,7 +64,11 @@ var Ink = React.createClass({displayName: "Ink",
     // var i = (""+this.state.i).substring(0,5),
     //     spread = (""+this.state.spread.max).substring(0,5);
 
-    return React.createElement("span", null, " ");
+    return React.createElement(
+      "span",
+      null,
+      " "
+    );
 
     // var distance = this.state.distance || "-";
     // var angle = this.state.angle || "-";
@@ -69,72 +86,148 @@ var Ink = React.createClass({displayName: "Ink",
 });
 
 module.exports = Ink;
-},{"react":160}],3:[function(require,module,exports){
+
+},{"react":162}],3:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
+var InkLabel = require("./InkLabel.jsx");
 
-var InkCloud = React.createClass({displayName: "InkCloud",
+var InkCloud = React.createClass({
+  displayName: "InkCloud",
 
-  render: function() {
-    var points = this.props.inks.all;
-    var min = 9999;
-    var max = -min;
 
-    points.forEach(function(entry) {
-      if(entry.distance < min) { min = entry.distance; }
-      if(entry.distance > max) { max = entry.distance; }
-    });
+  getInitialState: function () {
+    return {
+      darks: true,
+      neutrals: true,
+      colors: true
+    };
+  },
 
-    var diff = max - min;
-    var w = innerWidth/2;
-    var h = innerHeight/2;
-    var xf = w / diff;
-    var yf = h / diff;
+  render: function () {
+    var elements = this.getElements();
 
-    var self = this;
-    var elements = points.map(function(entry) {
-
-      var x = xf * entry.distance * Math.cos(entry.angle),
-          y = yf * entry.distance * Math.sin(entry.angle),
-          xscale = 1 + -0.4 * entry.distance/diff,
-          realign = function(evt) {
-            evt.stopPropagation();
-            self.realign(entry);
-          },
-          className = "inkpoint" + (entry.distance === 0 ? " selected" : ""),
-          label = entry.company + " " + entry.inkname,
-          showInfo = function(evt) {
-            self.refs.info.getDOMNode().innerHTML = label;
-          };
-
-      x = 50 * x/w - 1.5;
-      y = 40 * y/h - 7;
-
-      var style = {
-        background: "rgb("+entry.r+","+entry.g+","+entry.b+")",
-        transform: "translate(50vw, 45vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
-      };
-
-      return React.createElement("div", {className: className, 
-                  style: style, 
-                  onMouseOver: showInfo, 
-                  onClick: realign});
-    });
-
-    return (
-      React.createElement("div", {className: "inkcloud"}, 
-        React.createElement("header", null, 
-          React.createElement("h1", null, "Color distances in Fountain Pen land"), 
-          React.createElement("p", null, "The closer a color is to the central color, the closer they are in L*a*b space."), 
-          React.createElement("h2", {ref: "info"})
-        ), 
-        React.createElement("div", {className: "cloud"}, 
-          elements
-        )
+    return React.createElement(
+      "div",
+      { className: "inkcloud" },
+      React.createElement(
+        "header",
+        null,
+        React.createElement(
+          "h1",
+          null,
+          "Color distances in Fountain Pen land"
+        ),
+        React.createElement(
+          "p",
+          null,
+          "The closer a color is to the central color, the closer they are in L*a*b space."
+        ),
+        React.createElement(InkLabel, { ref: "info" }),
+        this.getToggles()
+      ),
+      React.createElement(
+        "div",
+        { className: "cloud" },
+        elements
       )
     );
   },
 
-  realign: function(entry) {
+  getToggles: function () {
+    var _this = this;
+    var toggles = ["darks", "neutrals", "colors"].map(function (s) {
+      return React.createElement(
+        "span",
+        { className: "toggle", onClick: _this.toggle(s) },
+        React.createElement("input", { type: "checkbox", checked: _this.state[s] }),
+        s
+      );
+    });
+    return React.createElement(
+      "div",
+      null,
+      toggles
+    );
+  },
+
+  toggle: function (type) {
+    var self = this;
+    return function () {
+      var props = {};
+      props[type] = !self.state[type];
+      self.setState(props);
+    };
+  },
+
+  /**
+   * Generate ink points for all inks known to the system.
+   * We also split it on
+   */
+  getElements: function () {
+    var _this2 = this;
+    var self = this;
+
+    var points = this.props.inks.all;
+
+    var min = 9999;
+    var max = -min;
+
+    points.forEach(function (entry) {
+      if (entry.distance < min) {
+        min = entry.distance;
+      }
+      if (entry.distance > max) {
+        max = entry.distance;
+      }
+    });
+
+    var diff = max - min;
+    var w = innerWidth / 2;
+    var h = innerHeight / 2;
+    var xf = w / diff;
+    var yf = h / diff;
+
+    var realign = function (entry) {
+      return function realign(evt) {
+        evt.stopPropagation();
+        self.realign(entry);
+      };
+    };
+
+    var showInfo = function (entry) {
+      return function (evt) {
+        self.refs.info.setValuesFrom(entry);
+      };
+    };
+
+    return points.filter(function (entry) {
+      var darks = _this2.state.darks && entry.darks;
+      var neutrals = _this2.state.neutrals && entry.neutrals;
+      var colors = _this2.state.colors && entry.colors;
+      return darks || neutrals || colors;
+    }).map(function (entry) {
+      var xscale = 1 + -0.4 * entry.distance / diff,
+          x = xf * entry.distance * Math.cos(entry.angle),
+          y = yf * entry.distance * Math.sin(entry.angle);
+      x = 50 * x / w - 1.5;
+      y = 40 * y / h - 7;
+      var props = {
+        className: "inkpoint" + (entry.distance === 0 ? " selected" : ""),
+        style: {
+          background: "rgb(" + entry.r + "," + entry.g + "," + entry.b + ")",
+          transform: "translate(50vw, 45vh) translate(" + x + "vw, " + y + "vh) scale(" + xscale + ")"
+        },
+        onMouseOver: showInfo(entry),
+        onClick: realign(entry),
+        key: entry.company + entry.inkname
+      };
+      return React.createElement("div", props);
+    });
+  },
+
+  realign: function (entry) {
     this.props.inkClicked(entry);
   }
 
@@ -142,7 +235,9 @@ var InkCloud = React.createClass({displayName: "InkCloud",
 
 module.exports = InkCloud;
 
-},{"react":160}],4:[function(require,module,exports){
+},{"./InkLabel.jsx":5,"react":162}],4:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
 var chroma = require("chroma-js");
 
@@ -151,30 +246,40 @@ var InkListing = require("./InkListing.jsx");
 var InkCloud = require("./InkCloud.jsx");
 var InkMatch = require("./InkMatch.jsx");
 
-var InkDB = React.createClass({displayName: "InkDB",
+var InkDB = React.createClass({
+  displayName: "InkDB",
 
-  mixins: [
-    require("../mixins/InkLoader")
-  ],
 
-  getInitialState: function() {
+  mixins: [require("../mixins/InkLoader")],
+
+  getInitialState: function () {
     return {
       currentEntry: {},
-      inks: {all:[], darks: [], neutrals: [], colors: []},
-      mode: "grid"
+      inks: { all: [], darks: [], neutrals: [], colors: [] },
+      mode: "match"
     };
   },
 
-  render: function() {
+  render: function () {
+    var viewer = React.createElement(ViewSelector, { ref: "selector", mode: this.state.mode, changeViewMode: this.switchMode });
 
-    var viewer = (
-      React.createElement(ViewSelector, {ref: "selector", mode: this.state.mode, changeViewMode: this.switchMode})
+    var linkback = React.createElement(
+      "div",
+      { className: "Pomax" },
+      "By ",
+      React.createElement(
+        "a",
+        { href: "http://twitter.com/TheRealPomax" },
+        "Pomax"
+      ),
+      ",",
+      "code ",
+      React.createElement(
+        "a",
+        { href: "http://github.com/Pomax/inkdb.org" },
+        "here"
+      )
     );
-
-    var linkback = (React.createElement("div", {className: "Pomax"}, 
-      "By ", React.createElement("a", {href: "http://twitter.com/TheRealPomax"}, "Pomax"), "," + ' ' +
-      "code ", React.createElement("a", {href: "http://github.com/Pomax/inkdb.org"}, "here")
-    ));
 
     var props = {
       inks: this.state.inks,
@@ -185,35 +290,38 @@ var InkDB = React.createClass({displayName: "InkDB",
 
     var maincontent;
 
-    switch(this.state.mode) {
+    switch (this.state.mode) {
       case "cloud":
-        maincontent = React.createElement(InkCloud, React.__spread({},  props));
+        maincontent = React.createElement(InkCloud, props);
         break;
       case "match":
-        maincontent = React.createElement(InkMatch, React.__spread({},  props));
+        maincontent = React.createElement(InkMatch, props);
         break;
-      case "grid":
       default:
-        maincontent = React.createElement(InkListing, React.__spread({},  props));
+        maincontent = React.createElement(InkListing, props);
     }
 
-    return (React.createElement("div", null, 
-      linkback, 
-      viewer, 
+    return React.createElement(
+      "div",
+      null,
+      linkback,
+      viewer,
       maincontent
-    ));
+    );
   },
 
-  switchMode: function(mode, callback) {
+  switchMode: function (mode, callback) {
     this.setState({
       mode: mode
-    }, function() {
+    }, function () {
       this.refs.selector.setMode(mode);
-      if(callback) callback();
-    })
+      if (callback) {
+        callback();
+      }
+    });
   },
 
-  setCurrentEntry: function(entry) {
+  setCurrentEntry: function (entry) {
     this.state.currentEntry.selected = false;
     entry.selected = true;
     this.setState({
@@ -221,31 +329,27 @@ var InkDB = React.createClass({displayName: "InkDB",
     });
   },
 
-  inkClicked: function(entry) {
-    if(this.state.mode === "cloud" && entry.selected) {
+  inkClicked: function (entry) {
+    if (this.state.mode === "cloud" && entry.selected) {
       return this.switchMode("grid");
     }
     var ref = chroma(entry.r, entry.g, entry.b, "rgb");
     this.alignInks(ref);
     var self = this;
-    this.switchMode("cloud", function() {
+    this.switchMode("cloud", function () {
       self.setCurrentEntry(entry);
     });
   },
 
-  alignInks: function(ref) {
+  alignInks: function (ref) {
     var inks = this.state.inks.all;
-    inks.forEach(function(entry) {
+    inks.forEach(function (entry) {
       var local = chroma(entry.r, entry.g, entry.b, "rgb");
       var rc = ref.lab();
       var lc = local.lab();
-      var distance = Math.sqrt(
-        Math.pow(rc[0]-lc[0], 2) +
-        Math.pow(rc[1]-lc[1], 2) +
-        Math.pow(rc[2]-lc[2], 2)
-      );
+      var distance = Math.sqrt(Math.pow(rc[0] - lc[0], 2) + Math.pow(rc[1] - lc[1], 2) + Math.pow(rc[2] - lc[2], 2));
       entry.distance = distance;
-      entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0])/180;
+      entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0]) / 180;
     });
   }
 
@@ -253,281 +357,476 @@ var InkDB = React.createClass({displayName: "InkDB",
 
 module.exports = InkDB;
 
-},{"../mixins/InkLoader":11,"./InkCloud.jsx":3,"./InkListing.jsx":5,"./InkMatch.jsx":6,"./ViewSelector.jsx":7,"chroma-js":13,"react":160}],5:[function(require,module,exports){
+},{"../mixins/InkLoader":13,"./InkCloud.jsx":3,"./InkListing.jsx":6,"./InkMatch.jsx":7,"./ViewSelector.jsx":8,"chroma-js":15,"react":162}],5:[function(require,module,exports){
+"use strict";
+
+var React = require("react");
+
+var InkLabel = React.createClass({
+  displayName: "InkLabel",
+
+
+  getInitialState: function () {
+    return {
+      company: this.props.company || "",
+      inkname: this.props.inkname || ""
+    };
+  },
+
+  render: function () {
+    return React.createElement(
+      "h2",
+      { clasName: "label" },
+      this.state.company,
+      " ",
+      this.state.inkname
+    );
+  },
+
+  setValuesFrom: function (entry) {
+    this.setState({
+      company: entry.company,
+      inkname: entry.inkname
+    });
+  }
+
+});
+
+module.exports = InkLabel;
+
+},{"react":162}],6:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
 var Ink = require("./Ink.jsx");
 var sorter = require("../lib/sorter");
 
-var InkListing = React.createClass({displayName: "InkListing",
+var InkListing = React.createClass({
+  displayName: "InkListing",
 
-  getInitialState: function() {
+
+  getInitialState: function () {
     return {
       sortingProperty: "color"
     };
   },
 
-  render: function() {
+  render: function () {
     var sortValue = this.state.sortingProperty;
     sorter.setSorting(sortValue);
     var inkCount = this.props.inks.all.length;
-    return (
-      React.createElement("div", {className: "ink listing", id: "top"}, 
-        React.createElement("h1", null, "A repository of ", inkCount, " fountain pen inks."), 
-
-        React.createElement("div", null, 
-          React.createElement("span", null, 
-            "filter: ", React.createElement("select", {value: sortValue, onChange: this.setSorting}, 
-              React.createElement("option", {value: "color"}, "by color"), 
-              React.createElement("option", {value: "name"}, "by name"), 
-              React.createElement("option", {value: "H"}, "by hue"), 
-              React.createElement("option", {value: "S"}, "by saturation"), 
-              React.createElement("option", {value: "L"}, "by luminoscity")
+    return React.createElement(
+      "div",
+      { className: "ink listing", id: "top" },
+      React.createElement(
+        "h1",
+        null,
+        "A repository of ",
+        inkCount,
+        " fountain pen inks."
+      ),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "span",
+          null,
+          "filter: ",
+          React.createElement(
+            "select",
+            { value: sortValue, onChange: this.setSorting },
+            React.createElement(
+              "option",
+              { value: "color" },
+              "by color"
+            ),
+            React.createElement(
+              "option",
+              { value: "name" },
+              "by name"
+            ),
+            React.createElement(
+              "option",
+              { value: "H" },
+              "by hue"
+            ),
+            React.createElement(
+              "option",
+              { value: "S" },
+              "by saturation"
+            ),
+            React.createElement(
+              "option",
+              { value: "L" },
+              "by luminoscity"
             )
-          ), 
-
-          " ", 
-
-          React.createElement("span", null, 
-            "filter company: ", React.createElement("input", {
-              type: "text", 
-              onChange: this.setCompanyFilter, 
-              placeholder: "type text here"})
-          ), 
-
-          " ", 
-
-          React.createElement("span", null, 
-            "filter name: ", React.createElement("input", {
-              type: "text", 
-              onChange: this.setNameFilter, 
-              placeholder: "type text here"})
           )
-        ), 
-
-        React.createElement("p", null, "Click an ink to see its position in the colour constellation"), 
-
-        React.createElement("div", null, 
-          React.createElement("a", {href: "#colors"}, "colors"), " ", React.createElement("a", {href: "#neutrals"}, "neutrals"), " ", React.createElement("a", {href: "#darks"}, "darks")
-        ), 
-
-        React.createElement("div", null, 
-          React.createElement("h2", {id: "colors"}, "Colors"), 
-           this.buildListing(this.props.inks.colors), 
-          React.createElement("h2", {id: "neutrals"}, "Neutrals (", React.createElement("a", {href: "#top"}, "top"), ")"), 
-           this.buildListing(this.props.inks.neutrals), 
-          React.createElement("h2", {id: "darks"}, "Darks (", React.createElement("a", {href: "#top"}, "top"), ")"), 
-           this.buildListing(this.props.inks.darks)    
+        ),
+        " ",
+        React.createElement(
+          "span",
+          null,
+          "filter company: ",
+          React.createElement("input", {
+            type: "text",
+            onChange: this.setCompanyFilter,
+            placeholder: "type text here" })
+        ),
+        " ",
+        React.createElement(
+          "span",
+          null,
+          "filter name: ",
+          React.createElement("input", {
+            type: "text",
+            onChange: this.setNameFilter,
+            placeholder: "type text here" })
         )
+      ),
+      React.createElement(
+        "p",
+        null,
+        "Click an ink to see its position in the colour constellation"
+      ),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "a",
+          { href: "#colors" },
+          "colors"
+        ),
+        " ",
+        React.createElement(
+          "a",
+          { href: "#neutrals" },
+          "neutrals"
+        ),
+        " ",
+        React.createElement(
+          "a",
+          { href: "#darks" },
+          "darks"
+        )
+      ),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "h2",
+          { id: "colors" },
+          "Colors"
+        ),
+        this.buildListing(this.props.inks.colors),
+        React.createElement(
+          "h2",
+          { id: "neutrals" },
+          "Neutrals (",
+          React.createElement(
+            "a",
+            { href: "#top" },
+            "top"
+          ),
+          ")"
+        ),
+        this.buildListing(this.props.inks.neutrals),
+        React.createElement(
+          "h2",
+          { id: "darks" },
+          "Darks (",
+          React.createElement(
+            "a",
+            { href: "#top" },
+            "top"
+          ),
+          ")"
+        ),
+        this.buildListing(this.props.inks.darks)
       )
     );
   },
 
-  componentDidMount: function() {
+  componentDidMount: function () {
     this.scrollTo();
   },
 
-  componentDidUpdate: function() {
+  componentDidUpdate: function () {
     this.scrollTo();
   },
 
-  scrollTo: function() {
+  scrollTo: function () {
     var position = document.querySelector(".selected.ink.swatch");
-    if(position) {
+    if (position) {
       position = position.getBoundingClientRect().top - 100;
-      scrollTo(0, position)
+      scrollTo(0, position);
     }
   },
 
-  buildListing: function(list) {
+  buildListing: function (list) {
     list = list.sort(sorter.sort);
     var re;
-    if(this.state.nameFilter) {
+    if (this.state.nameFilter) {
       re = new RegExp(this.state.nameFilter, "i");
-      list = list.filter(function(entry) {
+      list = list.filter(function (entry) {
         return !!entry.inkname.match(re);
       });
     }
-    if(this.state.companyFilter) {
+    if (this.state.companyFilter) {
       re = new RegExp(this.state.companyFilter, "i");
-      list = list.filter(function(entry) {
+      list = list.filter(function (entry) {
         return !!entry.company.match(re);
       });
     }
     var self = this;
-    list = list.map(function(data) {
-      var realign = function() {
+    list = list.map(function (data) {
+      var realign = function () {
         self.props.inkClicked(data);
       };
-      return React.createElement(Ink, {data: data, key: data.id, inkClicked: realign});
+      return React.createElement(Ink, { data: data, key: data.id, inkClicked: realign });
     });
     return list;
   },
 
-  setCompanyFilter: function(evt) {
+  setCompanyFilter: function (evt) {
     this.setState({ companyFilter: evt.target.value });
   },
 
-  setNameFilter: function(evt) {
+  setNameFilter: function (evt) {
     this.setState({ nameFilter: evt.target.value });
   },
 
-  setSorting: function(evt) {
+  setSorting: function (evt) {
     this.setState({ sortingProperty: evt.target.value });
   }
 
 });
 
 module.exports = InkListing;
-},{"../lib/sorter":10,"./Ink.jsx":2,"react":160}],6:[function(require,module,exports){
+
+},{"../lib/sorter":11,"./Ink.jsx":2,"react":162}],7:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
 var Dropzone = require("react-dropzone");
 var inkmatch = require("../lib/inkmatch");
 var chroma = require("chroma-js");
 
-var InkMatch = React.createClass({displayName: "InkMatch",
+var InkMatch = React.createClass({
+  displayName: "InkMatch",
 
-  getInitialState: function() {
+
+  getInitialState: function () {
     return {
       status: "Drop an image here.",
       pal: [],
       matches: [],
-      datauri: ""
+      datauri: "",
+      showOriginal: true
     };
   },
 
-  render: function() {
+  render: function () {
     var self = this;
 
-    var pal = this.state.pal
-      .sort(function(a,b) {
-        a = chroma(a[0],a[1],a[2],'rgb').hsl()[0];
-        b = chroma(b[0],b[1],b[2],'rgb').hsl()[0];
-        return a-b;
-      }).
-      map(function(rgb) {
-        var key = rgb.join('');
-        rgb = { r: rgb[0], g: rgb[1], b: rgb[2] };
-        var style = {
-          background: "rgb("+rgb.r+","+rgb.g+","+rgb.b+")"
-        };
-        var findMatch = function() {
-          self.findMatch(rgb);
-        };
-        return React.createElement("span", {className: "ink match", 
-                     style: style, 
-                     key: key, 
-                     onClick: findMatch})
-      });
+    var pal = this.state.pal.sort(function (a, b) {
+      a = chroma(a[0], a[1], a[2], "rgb").hsl()[0];
+      b = chroma(b[0], b[1], b[2], "rgb").hsl()[0];
+      return a - b;
+    }).map(function (rgb) {
+      var key = rgb.join("");
+      rgb = { r: rgb[0], g: rgb[1], b: rgb[2] };
+      var style = {
+        background: "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")"
+      };
+      var findMatch = function () {
+        self.findMatch(rgb);
+      };
+      return React.createElement("span", { className: "ink match",
+        style: style,
+        key: key,
+        onClick: findMatch });
+    });
 
-    var matches = this.state.matches
-      .map(function(ink) {
-        var clicked = function() {
-          self.props.inkClicked(ink);
-        };
-        var label = ink.company + " " + ink.inkname;
-        var style = {
-          background: "rgb("+ink.r+","+ink.g+","+ink.b+")"
-        };
-        return React.createElement("div", {className: "match row", 
-                    key: label, 
-                    onClick: clicked}, 
-          React.createElement("span", {className: "ink match", style: style}), 
-          React.createElement("span", null, label, " (d: ", (""+ink.distance).substring(0,4), ")")
-        );
-     });
-
-    return (
-      React.createElement("div", {className: "inkmatch"}, 
-        React.createElement("header", null, 
-          React.createElement("h1", null, "Drag-and-drop a file to start color-matching")
-        ), 
-        React.createElement("div", {className: "matching"}, 
-          React.createElement(Dropzone, {handler: this.fileHandler}, 
-             this.state.datauri ? React.createElement("img", {src: this.state.datauri}) : "", 
-            React.createElement("span", null, this.state.status)
-          ), 
-           pal.length ? React.createElement("div", {className: "palette"}, pal) : "", 
-           matches.length ? (
-            React.createElement("div", {className: "matches"}, 
-              React.createElement("h2", null, "Current best matches:"), 
-              matches
-            ) ) : ""
-          
+    var matches = this.state.matches.map(function (ink) {
+      var clicked = function () {
+        self.props.inkClicked(ink);
+      };
+      var label = ink.company + " " + ink.inkname;
+      var style = {
+        background: "rgb(" + ink.r + "," + ink.g + "," + ink.b + ")"
+      };
+      return React.createElement(
+        "div",
+        { className: "match row",
+          key: label,
+          onClick: clicked },
+        React.createElement("span", { className: "ink match", style: style }),
+        React.createElement(
+          "span",
+          null,
+          label,
+          " (d: ",
+          ("" + ink.distance).substring(0, 4),
+          ")"
         )
+      );
+    });
+
+    var src = this.state.showOriginal ? this.state.datauri : this.state.crushed;
+
+    return React.createElement(
+      "div",
+      { className: "inkmatch" },
+      React.createElement(
+        "header",
+        null,
+        React.createElement(
+          "h1",
+          null,
+          "Drag-and-drop a file to start color-matching"
+        )
+      ),
+      React.createElement(
+        "div",
+        { className: "matching" },
+        React.createElement(
+          Dropzone,
+          { className: "dropzone", onDrop: this.fileHandler },
+          this.state.datauri ? React.createElement("img", { src: src,
+            onMouseOver: this.showCrushed,
+            onMouseOut: this.showOriginal }) : "",
+          React.createElement(
+            "span",
+            null,
+            this.state.status
+          )
+        ),
+        pal.length ? React.createElement(
+          "div",
+          { className: "palette" },
+          pal
+        ) : "",
+        matches.length ? React.createElement(
+          "div",
+          { className: "matches" },
+          React.createElement(
+            "h2",
+            null,
+            "Current best matches:"
+          ),
+          matches
+        ) : ""
       )
     );
   },
 
-  findMatch: function(rgb) {
-    var ref = chroma(rgb.r, rgb.g, rgb.b, 'rgb');
+  showOriginal: function () {
+    this.setState({
+      showOriginal: true
+    });
+  },
+
+  showCrushed: function () {
+    this.setState({
+      showOriginal: false
+    });
+  },
+
+  findMatch: function (rgb) {
+    var ref = chroma(rgb.r, rgb.g, rgb.b, "rgb");
     this.props.alignInks(ref);
-    this.props.inks.all.sort(function(a,b) {
+    this.props.inks.all.sort(function (a, b) {
       a = a.distance;
       b = b.distance;
       return a - b;
     });
     this.setState({
-      matches: this.props.inks.all.slice(0,10)
+      matches: this.props.inks.all.slice(0, 10)
     });
   },
 
-  fileHandler: function(file) {
-    var self = this;
-    self.setState({
+  fileHandler: function (files) {
+    // console.log("receiving", { name: file.name, type: file.type, size: file.size });
+    this.setState({
       status: "Uploading...",
       datauri: ""
-    });
-
-    // console.log("receiving", {
-    //   name: file.name,
-    //   type: file.type,
-    //   size: file.size
-    // });
-
-    var reader = new FileReader();
-    reader.addEventListener("loadend", function (e) {
-      console.log("done");
-      self.setState({ status: "Processing..." });
-      data = this.result;
-      inkmatch(data, function(result) {
+    }, function () {
+      var self = this;
+      var file = files[0];
+      var reader = new FileReader();
+      reader.addEventListener("loadend", function (e) {
         self.setState({
-          status: "Pick a found color, or try with another image.",
-          pal: result,
-          datauri: data
+          status: "Processing..."
         });
+        inkmatch(this.result, self.setInkMatch);
       });
+      setTimeout(function () {
+        reader.readAsDataURL(file);
+      }, 250);
     });
-    reader.readAsDataURL(file);
+  },
+
+  setInkMatch: function (err, result) {
+    this.setState({
+      status: "Pick a found color, or try with another image.",
+      pal: result.pal,
+      datauri: this.toImageSource(result.data, result.width, result.height),
+      crushed: this.toImageSource(result.crushed, result.width, result.height)
+    }, function () {
+      console.log();
+    });
+  },
+
+  toImageSource: function (data, w, h) {
+    var cvs = document.createElement("canvas");
+    cvs.width = w;
+    cvs.height = h;
+    var ctx = cvs.getContext("2d");
+    var imgdata = ctx.getImageData(0, 0, w, h);
+    for (var i = data.length - 1; i >= 0; i--) {
+      imgdata.data[i] = data[i];
+    }
+    ctx.putImageData(imgdata, 0, 0);
+    return cvs.toDataURL("image/png");
   }
 
 });
 
 module.exports = InkMatch;
 
-},{"../lib/inkmatch":8,"chroma-js":13,"react":160,"react-dropzone":14}],7:[function(require,module,exports){
+},{"../lib/inkmatch":9,"chroma-js":15,"react":162,"react-dropzone":16}],8:[function(require,module,exports){
+"use strict";
+
 var React = require("react");
 
-var ViewSelector = React.createClass({displayName: "ViewSelector",
+var ViewSelector = React.createClass({
+  displayName: "ViewSelector",
 
-  getInitialState: function() {
+
+  getInitialState: function () {
     return {
       view: this.props.mode,
-      views: [ "grid", "cloud", "match" ]
+      views: ["grid", "cloud", "match"]
     };
   },
 
-  render: function() {
-    var options = this.state.views.map(function(e) {
-      return React.createElement("option", {value: e}, e, " layout");
+  render: function () {
+    var options = this.state.views.map(function (e) {
+      return React.createElement(
+        "option",
+        { value: e },
+        e,
+        " layout"
+      );
     });
-    return (
-      React.createElement("select", {className: "viewselector", value: this.state.view, onChange: this.viewModeChanged}, 
-        options
-      )
+    return React.createElement(
+      "select",
+      { className: "viewselector", value: this.state.view, onChange: this.viewModeChanged },
+      options
     );
   },
 
-  viewModeChanged: function(evt) {
+  viewModeChanged: function (evt) {
     var value = evt.target.value;
     this.setState({
       view: value
@@ -535,7 +834,7 @@ var ViewSelector = React.createClass({displayName: "ViewSelector",
     this.props.changeViewMode(value);
   },
 
-  setMode: function(mode) {
+  setMode: function (mode) {
     this.setState({
       view: mode
     });
@@ -545,55 +844,75 @@ var ViewSelector = React.createClass({displayName: "ViewSelector",
 
 module.exports = ViewSelector;
 
-},{"react":160}],8:[function(require,module,exports){
+},{"react":162}],9:[function(require,module,exports){
+"use strict";
+
 var RGBQuant = require("rgbquant");
 var JpegImage = require("./jpg.js");
+var temperature = require("../lib/temperature");
 
-module.exports = function inkmatch(dataURI, callback) {
+var opts = {
+  colors: 10,
+  boxSize: [200, 200],
+  initColors: 256
+};
 
-  function performAnalysis(cvs) {
-    var opts = {
-      colors: 10,
-      boxSize: [200,200],
-      initColors: 256
-    };
+module.exports = function inkmatch(dataURI, Kelvin, callback) {
+  var performAnalysis = function (data, width, height) {
+    data = data.data ? data.data : data;
+
+    if (Kelvin) {
+      var temp = temperature(Kelvin);
+      for (var i = 0, l = data.length; i < l; i += 4) {
+        data[i] = (data[i] + temp[0]) / 2;
+        data[i + 1] = (data[i + 1] + temp[1]) / 2;
+        data[i + 2] = (data[i + 2] + temp[2]) / 2;
+        data[i + 3] = 255;
+      }
+    }
+
     var quantizer = new RGBQuant(opts);
-    var img = new Image();
-    img.onload = function() {
-      quantizer.sample(img);
-      var threshold = 150;
-      var neutral = 15;
-      var pal = quantizer.palette(true, true).filter(function(rgb) {
-        if (rgb[0]<threshold && rgb[1]<threshold && rgb[2]<threshold) return true;
-        var d1 = Math.abs(rgb[0] - rgb[1]);
-        var d2 = Math.abs(rgb[1] - rgb[2]);
-        var d3 = Math.abs(rgb[2] - rgb[0]);
-        return !(d1<neutral && d2<neutral && d3<neutral);
-      });
-      callback(pal);
-    };
-    img.src = cvs.toDataURL("image/png");
-  }
+    quantizer.sample(data, width);
+    callback(false, {
+      pal: quantizer.palette(true, true),
+      data: data,
+      crushed: quantizer.reduce(data),
+      width: width,
+      height: height
+    });
+  };
 
-  function analyse(dataURI) {
+  var analyse = function (dataURI) {
     var jpeg = new JpegImage();
-    jpeg.onload = function() {
+    jpeg.onload = function () {
       var cvs = document.createElement("canvas");
-      cvs.width = jpeg.width;
-      cvs.height = jpeg.height;
+      var w = jpeg.width;
+      var h = jpeg.height;
+      cvs.width = w;
+      cvs.height = h;
       var ctx = cvs.getContext("2d");
-      var imageData = ctx.getImageData(0,0,jpeg.width,jpeg.height);
+      var imageData = ctx.getImageData(0, 0, w, h);
       jpeg.copyToImageData(imageData);
       ctx.putImageData(imageData, 0, 0);
-      performAnalysis(cvs);
+      var data = ctx.getImageData(0, 0, w, h);
+      setTimeout(function () {
+        performAnalysis(data, w, h);
+      }, 250);
     };
     jpeg.load(dataURI);
+  };
+
+  if (typeof Kelvin === "function") {
+    callback = Kelvin;
+    Kelvin = false;
   }
 
   analyse(dataURI);
 };
 
-},{"./jpg.js":9,"rgbquant":161}],9:[function(require,module,exports){
+},{"../lib/temperature":12,"./jpg.js":10,"rgbquant":163}],10:[function(require,module,exports){
+"use strict";
+
 /* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
 /* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 /*
@@ -622,42 +941,20 @@ module.exports = function inkmatch(dataURI, callback) {
 
 module.exports = (function jpegImage() {
   "use strict";
-  var dctZigZag = new Int32Array([
-     0,
-     1,  8,
-    16,  9,  2,
-     3, 10, 17, 24,
-    32, 25, 18, 11, 4,
-     5, 12, 19, 26, 33, 40,
-    48, 41, 34, 27, 20, 13,  6,
-     7, 14, 21, 28, 35, 42, 49, 56,
-    57, 50, 43, 36, 29, 22, 15,
-    23, 30, 37, 44, 51, 58,
-    59, 52, 45, 38, 31,
-    39, 46, 53, 60,
-    61, 54, 47,
-    55, 62,
-    63
-  ]);
+  // sqrt(2) / 2
 
-  var dctCos1  =  4017   // cos(pi/16)
-  var dctSin1  =   799   // sin(pi/16)
-  var dctCos3  =  3406   // cos(3*pi/16)
-  var dctSin3  =  2276   // sin(3*pi/16)
-  var dctCos6  =  1567   // cos(6*pi/16)
-  var dctSin6  =  3784   // sin(6*pi/16)
-  var dctSqrt2 =  5793   // sqrt(2)
-  var dctSqrt1d2 = 2896  // sqrt(2) / 2
+  var constructor = function () {};
 
-  function constructor() {
-  }
-
-  function buildHuffmanTable(codeLengths, values) {
-    var k = 0, code = [], i, j, length = 16;
-    while (length > 0 && !codeLengths[length - 1])
-      length--;
-    code.push({children: [], index: 0});
-    var p = code[0], q;
+  var buildHuffmanTable = function (codeLengths, values) {
+    var k = 0,
+        code = [],
+        i,
+        j,
+        length = 16;
+    while (length > 0 && !codeLengths[length - 1]) length--;
+    code.push({ children: [], index: 0 });
+    var p = code[0],
+        q;
     for (i = 0; i < length; i++) {
       for (j = 0; j < codeLengths[i]; j++) {
         p = code.pop();
@@ -668,7 +965,7 @@ module.exports = (function jpegImage() {
         p.index++;
         code.push(p);
         while (code.length <= i) {
-          code.push(q = {children: [], index: 0});
+          code.push(q = { children: [], index: 0 });
           p.children[p.index] = q.children;
           p = q;
         }
@@ -676,90 +973,75 @@ module.exports = (function jpegImage() {
       }
       if (i + 1 < length) {
         // p here points to last code
-        code.push(q = {children: [], index: 0});
+        code.push(q = { children: [], index: 0 });
         p.children[p.index] = q.children;
         p = q;
       }
     }
     return code[0].children;
-  }
+  };
 
-  function getBlockBufferOffset(component, row, col) {
+  var getBlockBufferOffset = function (component, row, col) {
     return 64 * ((component.blocksPerLine + 1) * row + col);
-  }
+  };
 
-  function decodeScan(data, offset,
-                      frame, components, resetInterval,
-                      spectralStart, spectralEnd,
-                      successivePrev, successive) {
-    var precision = frame.precision;
-    var samplesPerLine = frame.samplesPerLine;
-    var scanLines = frame.scanLines;
-    var mcusPerLine = frame.mcusPerLine;
-    var progressive = frame.progressive;
-    var maxH = frame.maxH, maxV = frame.maxV;
-
-    var startOffset = offset, bitsData = 0, bitsCount = 0;
-
-    function readBit() {
+  var decodeScan = function (data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive) {
+    var readBit = function () {
       if (bitsCount > 0) {
         bitsCount--;
-        return (bitsData >> bitsCount) & 1;
+        return bitsData >> bitsCount & 1;
       }
       bitsData = data[offset++];
-      if (bitsData == 0xFF) {
+      if (bitsData == 255) {
         var nextByte = data[offset++];
         if (nextByte) {
-          throw "unexpected marker: " + ((bitsData << 8) | nextByte).toString(16);
+          throw "unexpected marker: " + (bitsData << 8 | nextByte).toString(16);
         }
         // unstuff 0
       }
       bitsCount = 7;
       return bitsData >>> 7;
-    }
+    };
 
-    function decodeHuffman(tree) {
+    var decodeHuffman = function (tree) {
       var node = tree;
       var bit;
       while ((bit = readBit()) !== null) {
         node = node[bit];
-        if (typeof node === 'number')
-          return node;
-        if (typeof node !== 'object')
-          throw "invalid huffman sequence";
+        if (typeof node === "number") return node;
+        if (typeof node !== "object") throw "invalid huffman sequence";
       }
       return null;
-    }
+    };
 
-    function receive(length) {
+    var receive = function (length) {
       var n = 0;
       while (length > 0) {
         var bit = readBit();
         if (bit === null) return;
-        n = (n << 1) | bit;
+        n = n << 1 | bit;
         length--;
       }
       return n;
-    }
+    };
 
-    function receiveAndExtend(length) {
+    var receiveAndExtend = function (length) {
       var n = receive(length);
-      if (n >= 1 << (length - 1))
-        return n;
+      if (n >= 1 << length - 1) return n;
       return n + (-1 << length) + 1;
-    }
+    };
 
-    function decodeBaseline(component, offset) {
+    var decodeBaseline = function (component, offset) {
       var t = decodeHuffman(component.huffmanTableDC);
       var diff = t === 0 ? 0 : receiveAndExtend(t);
-      component.blockData[offset] = (component.pred += diff);
+      component.blockData[offset] = component.pred += diff;
       var k = 1;
       while (k < 64) {
         var rs = decodeHuffman(component.huffmanTableAC);
-        var s = rs & 15, r = rs >> 4;
+        var s = rs & 15,
+            r = rs >> 4;
         if (s === 0) {
-          if (r < 15)
-            break;
+          if (r < 15) break;
           k += 16;
           continue;
         }
@@ -768,28 +1050,29 @@ module.exports = (function jpegImage() {
         component.blockData[offset + z] = receiveAndExtend(s);
         k++;
       }
-    }
+    };
 
-    function decodeDCFirst(component, offset) {
+    var decodeDCFirst = function (component, offset) {
       var t = decodeHuffman(component.huffmanTableDC);
-      var diff = t === 0 ? 0 : (receiveAndExtend(t) << successive);
-      component.blockData[offset] = (component.pred += diff);
-    }
+      var diff = t === 0 ? 0 : receiveAndExtend(t) << successive;
+      component.blockData[offset] = component.pred += diff;
+    };
 
-    function decodeDCSuccessive(component, offset) {
+    var decodeDCSuccessive = function (component, offset) {
       component.blockData[offset] |= readBit() << successive;
-    }
+    };
 
-    var eobrun = 0;
-    function decodeACFirst(component, offset) {
+    var decodeACFirst = function (component, offset) {
       if (eobrun > 0) {
         eobrun--;
         return;
       }
-      var k = spectralStart, e = spectralEnd;
+      var k = spectralStart,
+          e = spectralEnd;
       while (k <= e) {
         var rs = decodeHuffman(component.huffmanTableAC);
-        var s = rs & 15, r = rs >> 4;
+        var s = rs & 15,
+            r = rs >> 4;
         if (s === 0) {
           if (r < 15) {
             eobrun = receive(r) + (1 << r) - 1;
@@ -803,94 +1086,114 @@ module.exports = (function jpegImage() {
         component.blockData[offset + z] = receiveAndExtend(s) * (1 << successive);
         k++;
       }
-    }
+    };
 
-    var successiveACState = 0, successiveACNextValue;
-    function decodeACSuccessive(component, offset) {
-      var k = spectralStart, e = spectralEnd, r = 0;
+    var decodeACSuccessive = function (component, offset) {
+      var k = spectralStart,
+          e = spectralEnd,
+          r = 0;
       while (k <= e) {
         var z = dctZigZag[k];
         switch (successiveACState) {
-        case 0: // initial state
-          var rs = decodeHuffman(component.huffmanTableAC);
-          var s = rs & 15, r = rs >> 4;
-          if (s === 0) {
-            if (r < 15) {
-              eobrun = receive(r) + (1 << r);
-              successiveACState = 4;
+          case 0:
+            // initial state
+            var rs = decodeHuffman(component.huffmanTableAC);
+            var s = rs & 15,
+                r = rs >> 4;
+            if (s === 0) {
+              if (r < 15) {
+                eobrun = receive(r) + (1 << r);
+                successiveACState = 4;
+              } else {
+                r = 16;
+                successiveACState = 1;
+              }
             } else {
-              r = 16;
-              successiveACState = 1;
+              if (s !== 1) throw "invalid ACn encoding";
+              successiveACNextValue = receiveAndExtend(s);
+              successiveACState = r ? 2 : 3;
             }
-          } else {
-            if (s !== 1)
-              throw "invalid ACn encoding";
-            successiveACNextValue = receiveAndExtend(s);
-            successiveACState = r ? 2 : 3;
-          }
-          continue;
-        case 1: // skipping r zero items
-        case 2:
-          if (component.blockData[offset + z]) {
-            component.blockData[offset + z] += (readBit() << successive);
-          } else {
-            r--;
-            if (r === 0)
-              successiveACState = successiveACState == 2 ? 3 : 0;
-          }
-          break;
-        case 3: // set value for a zero item
-          if (component.blockData[offset + z]) {
-            component.blockData[offset + z] += (readBit() << successive);
-          } else {
-            component.blockData[offset + z] = successiveACNextValue << successive;
-            successiveACState = 0;
-          }
-          break;
-        case 4: // eob
-          if (component.blockData[offset + z]) {
-            component.blockData[offset + z] += (readBit() << successive);
-          }
-          break;
+            continue;
+          case 1:
+          // skipping r zero items
+          case 2:
+            if (component.blockData[offset + z]) {
+              component.blockData[offset + z] += readBit() << successive;
+            } else {
+              r--;
+              if (r === 0) successiveACState = successiveACState == 2 ? 3 : 0;
+            }
+            break;
+          case 3:
+            // set value for a zero item
+            if (component.blockData[offset + z]) {
+              component.blockData[offset + z] += readBit() << successive;
+            } else {
+              component.blockData[offset + z] = successiveACNextValue << successive;
+              successiveACState = 0;
+            }
+            break;
+          case 4:
+            // eob
+            if (component.blockData[offset + z]) {
+              component.blockData[offset + z] += readBit() << successive;
+            }
+            break;
         }
         k++;
       }
       if (successiveACState === 4) {
         eobrun--;
-        if (eobrun === 0)
-          successiveACState = 0;
+        if (eobrun === 0) successiveACState = 0;
       }
-    }
+    };
 
-    function decodeMcu(component, decode, mcu, row, col) {
-      var mcuRow = (mcu / mcusPerLine) | 0;
+    var decodeMcu = function (component, decode, mcu, row, col) {
+      var mcuRow = mcu / mcusPerLine | 0;
       var mcuCol = mcu % mcusPerLine;
       var blockRow = mcuRow * component.v + row;
       var blockCol = mcuCol * component.h + col;
       var offset = getBlockBufferOffset(component, blockRow, blockCol);
       decode(component, offset);
-    }
+    };
 
-    function decodeBlock(component, decode, mcu) {
-      var blockRow = (mcu / component.blocksPerLine) | 0;
+    var decodeBlock = function (component, decode, mcu) {
+      var blockRow = mcu / component.blocksPerLine | 0;
       var blockCol = mcu % component.blocksPerLine;
       var offset = getBlockBufferOffset(component, blockRow, blockCol);
       decode(component, offset);
-    }
+    };
+
+    var precision = frame.precision;
+    var samplesPerLine = frame.samplesPerLine;
+    var scanLines = frame.scanLines;
+    var mcusPerLine = frame.mcusPerLine;
+    var progressive = frame.progressive;
+    var maxH = frame.maxH,
+        maxV = frame.maxV;
+
+    var startOffset = offset,
+        bitsData = 0,
+        bitsCount = 0;
+
+    var eobrun = 0;
+
+
+    var successiveACState = 0,
+        successiveACNextValue;
+
 
     var componentsLength = components.length;
     var component, i, j, k, n;
     var decodeFn;
     if (progressive) {
-      if (spectralStart === 0)
-        decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
-      else
-        decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
+      if (spectralStart === 0) decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;else decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
     } else {
       decodeFn = decodeBaseline;
     }
 
-    var mcu = 0, marker;
+    var mcu = 0,
+        marker;
     var mcuExpected;
     if (componentsLength == 1) {
       mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
@@ -933,12 +1236,13 @@ module.exports = (function jpegImage() {
 
       // find marker
       bitsCount = 0;
-      marker = (data[offset] << 8) | data[offset + 1];
-      if (marker <= 0xFF00) {
+      marker = data[offset] << 8 | data[offset + 1];
+      if (marker <= 65280) {
         throw "marker was not found";
       }
 
-      if (marker >= 0xFFD0 && marker <= 0xFFD7) { // RSTx
+      if (marker >= 65488 && marker <= 65495) {
+        // RSTx
         offset += 2;
       } else {
         break;
@@ -946,14 +1250,14 @@ module.exports = (function jpegImage() {
     }
 
     return offset - startOffset;
-  }
+  };
 
   // A port of poppler's IDCT method which in turn is taken from:
   //   Christoph Loeffler, Adriaan Ligtenberg, George S. Moschytz,
   //   "Practical Fast 1-D DCT Algorithms with 11 Multiplications",
   //   IEEE Intl. Conf. on Acoustics, Speech & Signal Processing, 1989,
   //   988-991.
-  function quantizeAndInverse(component, blockBufferOffset, p) {
+  var quantizeAndInverse = function (component, blockBufferOffset, p) {
     var qt = component.quantizationTable;
     var v0, v1, v2, v3, v4, v5, v6, v7, t;
     var i;
@@ -968,10 +1272,8 @@ module.exports = (function jpegImage() {
       var row = 8 * i;
 
       // check for all-zero AC coefficients
-      if (p[1 + row] == 0 && p[2 + row] == 0 && p[3 + row] == 0 &&
-          p[4 + row] == 0 && p[5 + row] == 0 && p[6 + row] == 0 &&
-          p[7 + row] == 0) {
-        t = (dctSqrt2 * p[0 + row] + 512) >> 10;
+      if (p[1 + row] == 0 && p[2 + row] == 0 && p[3 + row] == 0 && p[4 + row] == 0 && p[5 + row] == 0 && p[6 + row] == 0 && p[7 + row] == 0) {
+        t = dctSqrt2 * p[0 + row] + 512 >> 10;
         p[0 + row] = t;
         p[1 + row] = t;
         p[2 + row] = t;
@@ -984,41 +1286,41 @@ module.exports = (function jpegImage() {
       }
 
       // stage 4
-      v0 = (dctSqrt2 * p[0 + row] + 128) >> 8;
-      v1 = (dctSqrt2 * p[4 + row] + 128) >> 8;
+      v0 = dctSqrt2 * p[0 + row] + 128 >> 8;
+      v1 = dctSqrt2 * p[4 + row] + 128 >> 8;
       v2 = p[2 + row];
       v3 = p[6 + row];
-      v4 = (dctSqrt1d2 * (p[1 + row] - p[7 + row]) + 128) >> 8;
-      v7 = (dctSqrt1d2 * (p[1 + row] + p[7 + row]) + 128) >> 8;
+      v4 = dctSqrt1d2 * (p[1 + row] - p[7 + row]) + 128 >> 8;
+      v7 = dctSqrt1d2 * (p[1 + row] + p[7 + row]) + 128 >> 8;
       v5 = p[3 + row] << 4;
       v6 = p[5 + row] << 4;
 
       // stage 3
-      t = (v0 - v1+ 1) >> 1;
-      v0 = (v0 + v1 + 1) >> 1;
+      t = v0 - v1 + 1 >> 1;
+      v0 = v0 + v1 + 1 >> 1;
       v1 = t;
-      t = (v2 * dctSin6 + v3 * dctCos6 + 128) >> 8;
-      v2 = (v2 * dctCos6 - v3 * dctSin6 + 128) >> 8;
+      t = v2 * dctSin6 + v3 * dctCos6 + 128 >> 8;
+      v2 = v2 * dctCos6 - v3 * dctSin6 + 128 >> 8;
       v3 = t;
-      t = (v4 - v6 + 1) >> 1;
-      v4 = (v4 + v6 + 1) >> 1;
+      t = v4 - v6 + 1 >> 1;
+      v4 = v4 + v6 + 1 >> 1;
       v6 = t;
-      t = (v7 + v5 + 1) >> 1;
-      v5 = (v7 - v5 + 1) >> 1;
+      t = v7 + v5 + 1 >> 1;
+      v5 = v7 - v5 + 1 >> 1;
       v7 = t;
 
       // stage 2
-      t = (v0 - v3 + 1) >> 1;
-      v0 = (v0 + v3 + 1) >> 1;
+      t = v0 - v3 + 1 >> 1;
+      v0 = v0 + v3 + 1 >> 1;
       v3 = t;
-      t = (v1 - v2 + 1) >> 1;
-      v1 = (v1 + v2 + 1) >> 1;
+      t = v1 - v2 + 1 >> 1;
+      v1 = v1 + v2 + 1 >> 1;
       v2 = t;
-      t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
-      v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+      t = v4 * dctSin3 + v7 * dctCos3 + 2048 >> 12;
+      v4 = v4 * dctCos3 - v7 * dctSin3 + 2048 >> 12;
       v7 = t;
-      t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
-      v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+      t = v5 * dctSin1 + v6 * dctCos1 + 2048 >> 12;
+      v5 = v5 * dctCos1 - v6 * dctSin1 + 2048 >> 12;
       v6 = t;
 
       // stage 1
@@ -1037,110 +1339,120 @@ module.exports = (function jpegImage() {
       var col = i;
 
       // check for all-zero AC coefficients
-      if (p[1*8 + col] == 0 && p[2*8 + col] == 0 && p[3*8 + col] == 0 &&
-          p[4*8 + col] == 0 && p[5*8 + col] == 0 && p[6*8 + col] == 0 &&
-          p[7*8 + col] == 0) {
-        t = (dctSqrt2 * p[i+0] + 8192) >> 14;
-        p[0*8 + col] = t;
-        p[1*8 + col] = t;
-        p[2*8 + col] = t;
-        p[3*8 + col] = t;
-        p[4*8 + col] = t;
-        p[5*8 + col] = t;
-        p[6*8 + col] = t;
-        p[7*8 + col] = t;
+      if (p[1 * 8 + col] == 0 && p[2 * 8 + col] == 0 && p[3 * 8 + col] == 0 && p[4 * 8 + col] == 0 && p[5 * 8 + col] == 0 && p[6 * 8 + col] == 0 && p[7 * 8 + col] == 0) {
+        t = dctSqrt2 * p[i + 0] + 8192 >> 14;
+        p[0 * 8 + col] = t;
+        p[1 * 8 + col] = t;
+        p[2 * 8 + col] = t;
+        p[3 * 8 + col] = t;
+        p[4 * 8 + col] = t;
+        p[5 * 8 + col] = t;
+        p[6 * 8 + col] = t;
+        p[7 * 8 + col] = t;
         continue;
       }
 
       // stage 4
-      v0 = (dctSqrt2 * p[0*8 + col] + 2048) >> 12;
-      v1 = (dctSqrt2 * p[4*8 + col] + 2048) >> 12;
-      v2 = p[2*8 + col];
-      v3 = p[6*8 + col];
-      v4 = (dctSqrt1d2 * (p[1*8 + col] - p[7*8 + col]) + 2048) >> 12;
-      v7 = (dctSqrt1d2 * (p[1*8 + col] + p[7*8 + col]) + 2048) >> 12;
-      v5 = p[3*8 + col];
-      v6 = p[5*8 + col];
+      v0 = dctSqrt2 * p[0 * 8 + col] + 2048 >> 12;
+      v1 = dctSqrt2 * p[4 * 8 + col] + 2048 >> 12;
+      v2 = p[2 * 8 + col];
+      v3 = p[6 * 8 + col];
+      v4 = dctSqrt1d2 * (p[1 * 8 + col] - p[7 * 8 + col]) + 2048 >> 12;
+      v7 = dctSqrt1d2 * (p[1 * 8 + col] + p[7 * 8 + col]) + 2048 >> 12;
+      v5 = p[3 * 8 + col];
+      v6 = p[5 * 8 + col];
 
       // stage 3
-      t = (v0 - v1 + 1) >> 1;
-      v0 = (v0 + v1 + 1) >> 1;
+      t = v0 - v1 + 1 >> 1;
+      v0 = v0 + v1 + 1 >> 1;
       v1 = t;
-      t = (v2 * dctSin6 + v3 * dctCos6 + 2048) >> 12;
-      v2 = (v2 * dctCos6 - v3 * dctSin6 + 2048) >> 12;
+      t = v2 * dctSin6 + v3 * dctCos6 + 2048 >> 12;
+      v2 = v2 * dctCos6 - v3 * dctSin6 + 2048 >> 12;
       v3 = t;
-      t = (v4 - v6 + 1) >> 1;
-      v4 = (v4 + v6 + 1) >> 1;
+      t = v4 - v6 + 1 >> 1;
+      v4 = v4 + v6 + 1 >> 1;
       v6 = t;
-      t = (v7 + v5 + 1) >> 1;
-      v5 = (v7 - v5 + 1) >> 1;
+      t = v7 + v5 + 1 >> 1;
+      v5 = v7 - v5 + 1 >> 1;
       v7 = t;
 
       // stage 2
-      t = (v0 - v3 + 1) >> 1;
-      v0 = (v0 + v3 + 1) >> 1;
+      t = v0 - v3 + 1 >> 1;
+      v0 = v0 + v3 + 1 >> 1;
       v3 = t;
-      t = (v1 - v2 + 1) >> 1;
-      v1 = (v1 + v2 + 1) >> 1;
+      t = v1 - v2 + 1 >> 1;
+      v1 = v1 + v2 + 1 >> 1;
       v2 = t;
-      t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
-      v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+      t = v4 * dctSin3 + v7 * dctCos3 + 2048 >> 12;
+      v4 = v4 * dctCos3 - v7 * dctSin3 + 2048 >> 12;
       v7 = t;
-      t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
-      v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+      t = v5 * dctSin1 + v6 * dctCos1 + 2048 >> 12;
+      v5 = v5 * dctCos1 - v6 * dctSin1 + 2048 >> 12;
       v6 = t;
 
       // stage 1
-      p[0*8 + col] = v0 + v7;
-      p[7*8 + col] = v0 - v7;
-      p[1*8 + col] = v1 + v6;
-      p[6*8 + col] = v1 - v6;
-      p[2*8 + col] = v2 + v5;
-      p[5*8 + col] = v2 - v5;
-      p[3*8 + col] = v3 + v4;
-      p[4*8 + col] = v3 - v4;
+      p[0 * 8 + col] = v0 + v7;
+      p[7 * 8 + col] = v0 - v7;
+      p[1 * 8 + col] = v1 + v6;
+      p[6 * 8 + col] = v1 - v6;
+      p[2 * 8 + col] = v2 + v5;
+      p[5 * 8 + col] = v2 - v5;
+      p[3 * 8 + col] = v3 + v4;
+      p[4 * 8 + col] = v3 - v4;
     }
 
     // convert to 8-bit integers
     for (i = 0; i < 64; ++i) {
       var index = blockBufferOffset + i;
       var q = p[i];
-      q = (q <= -2056) ? 0 : (q >= 2024) ? 255 : (q + 2056) >> 4;
+      q = q <= -2056 ? 0 : q >= 2024 ? 255 : q + 2056 >> 4;
       component.blockData[index] = q;
     }
-  }
+  };
 
-  function buildComponentData(frame, component) {
+  var buildComponentData = function (frame, component) {
     var lines = [];
     var blocksPerLine = component.blocksPerLine;
     var blocksPerColumn = component.blocksPerColumn;
     var samplesPerLine = blocksPerLine << 3;
     var computationBuffer = new Int32Array(64);
 
-    var i, j, ll = 0;
+    var i,
+        j,
+        ll = 0;
     for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
       for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
-        var offset = getBlockBufferOffset(component, blockRow, blockCol)
+        var offset = getBlockBufferOffset(component, blockRow, blockCol);
         quantizeAndInverse(component, offset, computationBuffer);
       }
     }
     return component.blockData;
-  }
+  };
 
-  function clampToUint8(a) {
+  var clampToUint8 = function (a) {
     return a <= 0 ? 0 : a >= 255 ? 255 : a | 0;
-  }
+  };
+
+  var dctZigZag = new Int32Array([0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63]);
+
+  var dctCos1 = 4017; // cos(pi/16)
+  var dctSin1 = 799; // sin(pi/16)
+  var dctCos3 = 3406; // cos(3*pi/16)
+  var dctSin3 = 2276; // sin(3*pi/16)
+  var dctCos6 = 1567; // cos(6*pi/16)
+  var dctSin6 = 3784; // sin(6*pi/16)
+  var dctSqrt2 = 5793; // sqrt(2)
+  var dctSqrt1d2 = 2896;
 
   constructor.prototype = {
     load: function load(path) {
-      var handleData = (function(data) {
+      var handleData = (function (data) {
         this.parse(arr);
-        if (this.onload)
-          this.onload();
+        if (this.onload) this.onload();
       }).bind(this);
 
       if (path.indexOf("data:") > -1) {
-        var offset = path.indexOf("base64,")+7;
+        var offset = path.indexOf("base64,") + 7;
         var data = atob(path.substring(offset));
         var arr = new Uint8Array(data.length);
         for (var i = data.length - 1; i >= 0; i--) {
@@ -1151,7 +1463,7 @@ module.exports = (function jpegImage() {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", path, true);
         xhr.responseType = "arraybuffer";
-        xhr.onload = (function() {
+        xhr.onload = (function () {
           // TODO catch parse error
           var data = new Uint8Array(xhr.response);
           handleData(data);
@@ -1161,83 +1473,102 @@ module.exports = (function jpegImage() {
     },
 
     parse: function parse(data) {
-
-      function readUint16() {
-        var value = (data[offset] << 8) | data[offset + 1];
+      var readUint16 = function () {
+        var value = data[offset] << 8 | data[offset + 1];
         offset += 2;
         return value;
-      }
+      };
 
-      function readDataBlock() {
+      var readDataBlock = function () {
         var length = readUint16();
         var array = data.subarray(offset, offset + length - 2);
         offset += array.length;
         return array;
-      }
+      };
 
-      function prepareComponents(frame) {
+      var prepareComponents = function (frame) {
         var mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / frame.maxH);
         var mcusPerColumn = Math.ceil(frame.scanLines / 8 / frame.maxV);
         for (var i = 0; i < frame.components.length; i++) {
           component = frame.components[i];
           var blocksPerLine = Math.ceil(Math.ceil(frame.samplesPerLine / 8) * component.h / frame.maxH);
-          var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines  / 8) * component.v / frame.maxV);
+          var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines / 8) * component.v / frame.maxV);
           var blocksPerLineForMcu = mcusPerLine * component.h;
           var blocksPerColumnForMcu = mcusPerColumn * component.v;
 
-          var blocksBufferSize = 64 * blocksPerColumnForMcu
-                                    * (blocksPerLineForMcu + 1);
+          var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
           component.blockData = new Int16Array(blocksBufferSize);
           component.blocksPerLine = blocksPerLine;
           component.blocksPerColumn = blocksPerColumn;
         }
         frame.mcusPerLine = mcusPerLine;
         frame.mcusPerColumn = mcusPerColumn;
-      }
+      };
 
-      var offset = 0, length = data.length;
+      var offset = 0,
+          length = data.length;
       var jfif = null;
       var adobe = null;
       var pixels = null;
       var frame, resetInterval;
       var quantizationTables = [];
-      var huffmanTablesAC = [], huffmanTablesDC = [];
+      var huffmanTablesAC = [],
+          huffmanTablesDC = [];
       var fileMarker = readUint16();
-      if (fileMarker != 0xFFD8) { // SOI (Start of Image)
+      if (fileMarker != 65496) {
+        // SOI (Start of Image)
         throw "SOI not found";
       }
 
       fileMarker = readUint16();
-      while (fileMarker != 0xFFD9) { // EOI (End of image)
+      while (fileMarker != 65497) {
+        // EOI (End of image)
         var i, j, l;
-        switch(fileMarker) {
-          case 0xFFE0: // APP0 (Application Specific)
-          case 0xFFE1: // APP1
-          case 0xFFE2: // APP2
-          case 0xFFE3: // APP3
-          case 0xFFE4: // APP4
-          case 0xFFE5: // APP5
-          case 0xFFE6: // APP6
-          case 0xFFE7: // APP7
-          case 0xFFE8: // APP8
-          case 0xFFE9: // APP9
-          case 0xFFEA: // APP10
-          case 0xFFEB: // APP11
-          case 0xFFEC: // APP12
-          case 0xFFED: // APP13
-          case 0xFFEE: // APP14
-          case 0xFFEF: // APP15
-          case 0xFFFE: // COM (Comment)
+        switch (fileMarker) {
+          case 65504:
+          // APP0 (Application Specific)
+          case 65505:
+          // APP1
+          case 65506:
+          // APP2
+          case 65507:
+          // APP3
+          case 65508:
+          // APP4
+          case 65509:
+          // APP5
+          case 65510:
+          // APP6
+          case 65511:
+          // APP7
+          case 65512:
+          // APP8
+          case 65513:
+          // APP9
+          case 65514:
+          // APP10
+          case 65515:
+          // APP11
+          case 65516:
+          // APP12
+          case 65517:
+          // APP13
+          case 65518:
+          // APP14
+          case 65519:
+          // APP15
+          case 65534:
+            // COM (Comment)
             var appData = readDataBlock();
 
-            if (fileMarker === 0xFFE0) {
-              if (appData[0] === 0x4A && appData[1] === 0x46 && appData[2] === 0x49 &&
-                appData[3] === 0x46 && appData[4] === 0) { // 'JFIF\x00'
+            if (fileMarker === 65504) {
+              if (appData[0] === 74 && appData[1] === 70 && appData[2] === 73 && appData[3] === 70 && appData[4] === 0) {
+                // 'JFIF\x00'
                 jfif = {
                   version: { major: appData[5], minor: appData[6] },
                   densityUnits: appData[7],
-                  xDensity: (appData[8] << 8) | appData[9],
-                  yDensity: (appData[10] << 8) | appData[11],
+                  xDensity: appData[8] << 8 | appData[9],
+                  yDensity: appData[10] << 8 | appData[11],
                   thumbWidth: appData[12],
                   thumbHeight: appData[13],
                   thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
@@ -1245,58 +1576,65 @@ module.exports = (function jpegImage() {
               }
             }
             // TODO APP1 - Exif
-            if (fileMarker === 0xFFEE) {
-              if (appData[0] === 0x41 && appData[1] === 0x64 && appData[2] === 0x6F &&
-                appData[3] === 0x62 && appData[4] === 0x65 && appData[5] === 0) { // 'Adobe\x00'
+            if (fileMarker === 65518) {
+              if (appData[0] === 65 && appData[1] === 100 && appData[2] === 111 && appData[3] === 98 && appData[4] === 101 && appData[5] === 0) {
+                // 'Adobe\x00'
                 adobe = {
                   version: appData[6],
-                  flags0: (appData[7] << 8) | appData[8],
-                  flags1: (appData[9] << 8) | appData[10],
+                  flags0: appData[7] << 8 | appData[8],
+                  flags1: appData[9] << 8 | appData[10],
                   transformCode: appData[11]
                 };
               }
             }
             break;
 
-          case 0xFFDB: // DQT (Define Quantization Tables)
+          case 65499:
+            // DQT (Define Quantization Tables)
             var quantizationTablesLength = readUint16();
             var quantizationTablesEnd = quantizationTablesLength + offset - 2;
             while (offset < quantizationTablesEnd) {
               var quantizationTableSpec = data[offset++];
               var tableData = new Int32Array(64);
-              if ((quantizationTableSpec >> 4) === 0) { // 8 bit values
+              if (quantizationTableSpec >> 4 === 0) {
+                // 8 bit values
                 for (j = 0; j < 64; j++) {
                   var z = dctZigZag[j];
                   tableData[z] = data[offset++];
                 }
-              } else if ((quantizationTableSpec >> 4) === 1) { //16 bit
+              } else if (quantizationTableSpec >> 4 === 1) {
+                //16 bit
                 for (j = 0; j < 64; j++) {
                   var z = dctZigZag[j];
                   tableData[z] = readUint16();
                 }
-              } else
-                throw "DQT: invalid table spec";
+              } else throw "DQT: invalid table spec";
               quantizationTables[quantizationTableSpec & 15] = tableData;
             }
             break;
 
-          case 0xFFC0: // SOF0 (Start of Frame, Baseline DCT)
-          case 0xFFC1: // SOF1 (Start of Frame, Extended DCT)
-          case 0xFFC2: // SOF2 (Start of Frame, Progressive DCT)
+          case 65472:
+          // SOF0 (Start of Frame, Baseline DCT)
+          case 65473:
+          // SOF1 (Start of Frame, Extended DCT)
+          case 65474:
+            // SOF2 (Start of Frame, Progressive DCT)
             if (frame) {
               throw "Only single frame JPEGs supported";
             }
             readUint16(); // skip data length
             frame = {};
-            frame.extended = (fileMarker === 0xFFC1);
-            frame.progressive = (fileMarker === 0xFFC2);
+            frame.extended = fileMarker === 65473;
+            frame.progressive = fileMarker === 65474;
             frame.precision = data[offset++];
             frame.scanLines = readUint16();
             frame.samplesPerLine = readUint16();
             frame.components = [];
             frame.componentIds = {};
-            var componentsCount = data[offset++], componentId;
-            var maxH = 0, maxV = 0;
+            var componentsCount = data[offset++],
+                componentId;
+            var maxH = 0,
+                maxV = 0;
             for (i = 0; i < componentsCount; i++) {
               componentId = data[offset];
               var h = data[offset + 1] >> 4;
@@ -1317,34 +1655,34 @@ module.exports = (function jpegImage() {
             prepareComponents(frame);
             break;
 
-          case 0xFFC4: // DHT (Define Huffman Tables)
+          case 65476:
+            // DHT (Define Huffman Tables)
             var huffmanLength = readUint16();
             for (i = 2; i < huffmanLength;) {
               var huffmanTableSpec = data[offset++];
               var codeLengths = new Uint8Array(16);
               var codeLengthSum = 0;
-              for (j = 0; j < 16; j++, offset++)
-                codeLengthSum += (codeLengths[j] = data[offset]);
+              for (j = 0; j < 16; j++, offset++) codeLengthSum += codeLengths[j] = data[offset];
               var huffmanValues = new Uint8Array(codeLengthSum);
-              for (j = 0; j < codeLengthSum; j++, offset++)
-                huffmanValues[j] = data[offset];
+              for (j = 0; j < codeLengthSum; j++, offset++) huffmanValues[j] = data[offset];
               i += 17 + codeLengthSum;
 
-              ((huffmanTableSpec >> 4) === 0 ?
-                huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] =
-                buildHuffmanTable(codeLengths, huffmanValues);
+              (huffmanTableSpec >> 4 === 0 ? huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] = buildHuffmanTable(codeLengths, huffmanValues);
             }
             break;
 
-          case 0xFFDD: // DRI (Define Restart Interval)
+          case 65501:
+            // DRI (Define Restart Interval)
             readUint16(); // skip data length
             resetInterval = readUint16();
             break;
 
-          case 0xFFDA: // SOS (Start of Scan)
+          case 65498:
+            // SOS (Start of Scan)
             var scanLength = readUint16();
             var selectorsCount = data[offset++];
-            var components = [], component;
+            var components = [],
+                component;
             for (i = 0; i < selectorsCount; i++) {
               var componentIndex = frame.componentIds[data[offset++]];
               component = frame.components[componentIndex];
@@ -1356,15 +1694,11 @@ module.exports = (function jpegImage() {
             var spectralStart = data[offset++];
             var spectralEnd = data[offset++];
             var successiveApproximation = data[offset++];
-            var processed = decodeScan(data, offset,
-              frame, components, resetInterval,
-              spectralStart, spectralEnd,
-              successiveApproximation >> 4, successiveApproximation & 15);
+            var processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15);
             offset += processed;
             break;
           default:
-            if (data[offset - 3] == 0xFF &&
-                data[offset - 2] >= 0xC0 && data[offset - 2] <= 0xFE) {
+            if (data[offset - 3] == 255 && data[offset - 2] >= 192 && data[offset - 2] <= 254) {
               // could be incorrect encoding -- last 0xFF byte of the previous
               // block was eaten by the encoder
               offset -= 3;
@@ -1393,7 +1727,8 @@ module.exports = (function jpegImage() {
     },
 
     getData: function getData(width, height) {
-      var scaleX = this.width / width, scaleY = this.height / height;
+      var scaleX = this.width / width,
+          scaleY = this.height / height;
 
       var component, componentScaleX, componentScaleY;
       var x, y, i;
@@ -1407,8 +1742,7 @@ module.exports = (function jpegImage() {
 
       // lineData is reused for all components. Assume first component is
       // the biggest
-      var lineData = new Uint8Array((this.components[0].blocksPerLine << 3) *
-                                    this.components[0].blocksPerColumn * 8);
+      var lineData = new Uint8Array((this.components[0].blocksPerLine << 3) * this.components[0].blocksPerColumn * 8);
 
       // First construct image data ...
       for (i = 0; i < numComponents; i++) {
@@ -1417,18 +1751,20 @@ module.exports = (function jpegImage() {
         var blocksPerColumn = component.blocksPerColumn;
         var samplesPerLine = blocksPerLine << 3;
 
-        var j, k, ll = 0;
+        var j,
+            k,
+            ll = 0;
         var lineOffset = 0;
         for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
           var scanLine = blockRow << 3;
           for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
             var bufferOffset = getBlockBufferOffset(component, blockRow, blockCol);
-            var offset = 0, sample = blockCol << 3;
+            var offset = 0,
+                sample = blockCol << 3;
             for (j = 0; j < 8; j++) {
               var lineOffset = (scanLine + j) * samplesPerLine;
               for (k = 0; k < 8; k++) {
-                lineData[lineOffset + sample + k] =
-                  component.output[bufferOffset + offset++];
+                lineData[lineOffset + sample + k] = component.output[bufferOffset + offset++];
               }
             }
           }
@@ -1442,8 +1778,8 @@ module.exports = (function jpegImage() {
         var index;
         for (y = 0; y < height; y++) {
           for (x = 0; x < width; x++) {
-            cy = 0 | (y * componentScaleY);
-            cx = 0 | (x * componentScaleX);
+            cy = 0 | y * componentScaleY;
+            cx = 0 | x * componentScaleX;
             index = cy * samplesPerLine + cx;
             data[offset] = lineData[index];
             offset += numComponents;
@@ -1453,21 +1789,20 @@ module.exports = (function jpegImage() {
 
       // ... then transform colors, if necessary
       switch (numComponents) {
-        case 1: case 2: break;
+        case 1:
+        case 2:
+          break;
         // no color conversion for one or two compoenents
 
         case 3:
           // The default transform for three components is true
           colorTransform = true;
           // The adobe transform marker overrides any previous setting
-          if (this.adobe && this.adobe.transformCode)
-            colorTransform = true;
-          else if (typeof this.colorTransform !== 'undefined')
-            colorTransform = !!this.colorTransform;
+          if (this.adobe && this.adobe.transformCode) colorTransform = true;else if (typeof this.colorTransform !== "undefined") colorTransform = !!this.colorTransform;
 
           if (colorTransform) {
             for (i = 0; i < dataLength; i += numComponents) {
-              Y  = data[i    ];
+              Y = data[i];
               Cb = data[i + 1];
               Cr = data[i + 2];
 
@@ -1475,26 +1810,22 @@ module.exports = (function jpegImage() {
               G = clampToUint8(Y + 135.459 - 0.344 * Cb - 0.714 * Cr);
               B = clampToUint8(Y - 226.816 + 1.772 * Cb);
 
-              data[i    ] = R;
+              data[i] = R;
               data[i + 1] = G;
               data[i + 2] = B;
             }
           }
           break;
         case 4:
-          if (!this.adobe)
-            throw 'Unsupported color mode (4 components)';
+          if (!this.adobe) throw "Unsupported color mode (4 components)";
           // The default transform for four components is false
           colorTransform = false;
           // The adobe transform marker overrides any previous setting
-          if (this.adobe && this.adobe.transformCode)
-            colorTransform = true;
-          else if (typeof this.colorTransform !== 'undefined')
-            colorTransform = !!this.colorTransform;
+          if (this.adobe && this.adobe.transformCode) colorTransform = true;else if (typeof this.colorTransform !== "undefined") colorTransform = !!this.colorTransform;
 
           if (colorTransform) {
             for (i = 0; i < dataLength; i += numComponents) {
-              Y  = data[i];
+              Y = data[i];
               Cb = data[i + 1];
               Cr = data[i + 2];
 
@@ -1502,7 +1833,7 @@ module.exports = (function jpegImage() {
               M = clampToUint8(119.541 - Y + 0.344 * Cb + 0.714 * Cr);
               Y = clampToUint8(481.816 - Y - 1.772 * Cb);
 
-              data[i    ] = C;
+              data[i] = C;
               data[i + 1] = M;
               data[i + 2] = Y;
               // K is unchanged
@@ -1510,16 +1841,20 @@ module.exports = (function jpegImage() {
           }
           break;
         default:
-          throw 'Unsupported color mode';
+          throw "Unsupported color mode";
       }
       return data;
     },
     copyToImageData: function copyToImageData(imageData) {
-      var width = imageData.width, height = imageData.height;
+      var width = imageData.width,
+          height = imageData.height;
       var imageDataBytes = width * height * 4;
       var imageDataArray = imageData.data;
       var data = this.getData(width, height);
-      var i = 0, j = 0, k0, k1;
+      var i = 0,
+          j = 0,
+          k0,
+          k1;
       var Y, K, C, M, R, G, B;
       switch (this.components.length) {
         case 1:
@@ -1566,7 +1901,7 @@ module.exports = (function jpegImage() {
           }
           break;
         default:
-          throw 'Unsupported color mode';
+          throw "Unsupported color mode";
       }
     }
   };
@@ -1574,29 +1909,31 @@ module.exports = (function jpegImage() {
   return constructor;
 })();
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+"use strict";
+
 var globalSortingProperty;
 
 var sortObject = {
 
-  setSorting: function(prop) {
+  setSorting: function (prop) {
     globalSortingProperty = prop;
   },
 
-  sort: function(a, b, prop) {
+  sort: function (a, b, prop) {
     prop = prop || globalSortingProperty;
-    if(prop === "color") {
-      return sortObject.sortByColor(a,b);
+    if (prop === "color") {
+      return sortObject.sortByColor(a, b);
     }
-    if(prop === "name") {
-      return sortObject.sortByName(a,b);
+    if (prop === "name") {
+      return sortObject.sortByName(a, b);
     }
     var _a = a[prop];
     var _b = b[prop];
-    return _a < _b ? -1 : _a > _b ? 1 : sortObject.sortByName(a,b);
+    return _a < _b ? -1 : _a > _b ? 1 : sortObject.sortByName(a, b);
   },
 
-  sortByName: function(a,b) {
+  sortByName: function (a, b) {
     var _a = a.company;
     var _b = b.company;
     if (_a < _b) {
@@ -1612,89 +1949,133 @@ var sortObject = {
   },
 
   // sorting "by color" requires some smarties
-  sortByColor: function(a,b) {
+  sortByColor: function (a, b) {
     return sortObject.sort(a, b, "H");
 
     /*
       But we really want to split out three
       parts: darks, neutrals, and colors.
-
-      So, we need to rank based on:
+       So, we need to rank based on:
       - L < 0.3 (darks)
       - S < 0.1 (neutral)
       - H (everything else)
     */
 
-/*
-    var LT = 0.15;
-    if(a.L < LT) {
-      if(b.L < LT) {
-        return a.L - b.L;
-      }
-      return -1;
-    }
-    if(b.L < LT) {
-      return 1;
-    }
-
-    var ST = 0.1;
-    if(a.S < ST) {
-      if(b.S < ST) {
-        return a.S - b.S;
-      }
-      return -1;
-    }
-    if(b.S < ST) {
-      return 1;
-    }
-
-    return sortObject.sort(a,b,"H");
-*/
+    /*
+        var LT = 0.15;
+        if(a.L < LT) {
+          if(b.L < LT) {
+            return a.L - b.L;
+          }
+          return -1;
+        }
+        if(b.L < LT) {
+          return 1;
+        }
+    
+        var ST = 0.1;
+        if(a.S < ST) {
+          if(b.S < ST) {
+            return a.S - b.S;
+          }
+          return -1;
+        }
+        if(b.S < ST) {
+          return 1;
+        }
+    
+        return sortObject.sort(a,b,"H");
+    */
   }
 };
 
 module.exports = sortObject;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+"use strict";
+
+function clamp(x, min, max) {
+  return x < min ? min : x > max ? max : x;
+}
+
+function temperature(K) {
+  var T = K / 100,
+      r,
+      g,
+      b;
+  if (T <= 66) {
+    r = 255;
+    g = 99.4708025861 * Math.log(T) - 161.1195681661;
+    b = 0;
+    if (T > 19) {
+      b = 138.5177312231 * Math.log(T - 10) - 305.0447927307;
+    }
+  } else {
+    r = 329.698727446 * Math.pow(T - 60, -0.1332047592);
+    g = 288.1221695283 * Math.pow(T - 60, -0.0755148492);
+    b = 255;
+  }
+
+  r = clamp(r, 0, 255);
+  g = clamp(g, 0, 255);
+  b = clamp(b, 0, 255);
+
+  return [r, g, b];
+}
+
+module.exports = temperature;
+
+},{}],13:[function(require,module,exports){
+"use strict";
+
 var request = require("superagent");
 
 var InkLoader = {
 
-  componentDidMount: function() {
+  componentDidMount: function () {
     request.get("data.json").end(this.processInks);
   },
 
-  processInks: function(err, data) {
+  processInks: function (err, data) {
     data = JSON.parse(data.text);
     var inks = [],
         darks = [],
         neutrals = [],
         colors = [],
-        enrich = function(e) {
-          var r = parseInt(e.r,10);
-          var g = parseInt(e.g,10);
-          var b = parseInt(e.b,10);
-          var i = (r+g+b)/3;
-          e.i = i;
-          var sr = Math.abs(r-i);
-          var sg = Math.abs(g-i);
-          var sb = Math.abs(b-i);
-          e.spread = {
-            max: Math.max(sr,Math.max(sg,sb)),
-            min: Math.min(sr,Math.min(sg,sb)),
-          };
-        };
+        enrich = function (e) {
+      var r = parseInt(e.r, 10);
+      var g = parseInt(e.g, 10);
+      var b = parseInt(e.b, 10);
+      var i = (r + g + b) / 3;
+      e.i = i;
+      var sr = Math.abs(r - i);
+      var sg = Math.abs(g - i);
+      var sb = Math.abs(b - i);
+      e.spread = {
+        max: Math.max(sr, Math.max(sg, sb)),
+        min: Math.min(sr, Math.min(sg, sb)) };
+    };
 
-    Object.keys(data).forEach(function(k) {
+    Object.keys(data).forEach(function (k) {
       var entry = data[k],
-          H = entry.H,
-          S = entry.S,
+
+      // H = entry.H,
+      S = entry.S,
           L = entry.L;
       enrich(entry);
-      if(L < 0.08) { darks.push(entry); }
-      else if(L < 0.15 && S < 0.3) { darks.push(entry); }
-      else if(S < 0.09 || (S < 0.2 && L < 0.25)) { neutrals.push(entry); }
-      else { colors.push(entry); }
+      if (L < 0.08) {
+        entry.darks = true;
+        darks.push(entry);
+      } else if (L < 0.15 && S < 0.3) {
+        entry.darks = true;
+        darks.push(entry);
+      } else if (S < 0.09 || S < 0.2 && L < 0.25) {
+        entry.neutrals = true;
+        neutrals.push(entry);
+      } else {
+        entry.colors = true;
+        colors.push(entry);
+      }
       inks.push(entry);
     });
 
@@ -1712,7 +2093,7 @@ var InkLoader = {
 
 module.exports = InkLoader;
 
-},{"superagent":162}],12:[function(require,module,exports){
+},{"superagent":164}],14:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1771,7 +2152,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 // Generated by CoffeeScript 1.6.2
 /** echo  * @license echo  * while read i do echo  *  done echo
 */
@@ -3668,7 +4049,7 @@ process.umask = function() { return 0; };
 
 }).call(this);
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * @jsx React.DOM
  */
@@ -3682,13 +4063,19 @@ var Dropzone = React.createClass({displayName: "Dropzone",
     }
   },
 
-  handleDragLeave: function(e) {
+  propTypes: {
+    onDrop: React.PropTypes.func.isRequired,
+    size: React.PropTypes.number,
+    style: React.PropTypes.object
+  },
+
+  onDragLeave: function(e) {
     this.setState({
       isDragActive: false
     });
   },
 
-  handleDragOver: function(e) {
+  onDragOver: function(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
 
@@ -3697,46 +4084,51 @@ var Dropzone = React.createClass({displayName: "Dropzone",
     });
   },
 
-  handleDrop: function(e) {
+  onDrop: function(e) {
     e.preventDefault();
 
     this.setState({
       isDragActive: false
     });
 
-    if (this.props.handler) {
-      var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-      this.props.handler(file);
-    } else {
-      console.error('No handler specified to accept the dropped file.');
+    var files;
+    if (e.dataTransfer) {
+      files = e.dataTransfer.files;
+    } else if (e.target) {
+      files = e.target.files;
+    }
+
+    if (this.props.onDrop) {
+      files = Array.prototype.slice.call(files);
+      this.props.onDrop(files);
     }
   },
+
+  onClick: function () {
+    this.refs.fileInput.getDOMNode().click();
+  },
+
   render: function() {
 
-    var size = this.props.size || "100pt";
-      var dropzoneStyle = this.props.children ? {} : {
-        width: size,
-        height: size,
-        borderRadius: "10%",
-        borderWidth: "2pt",
-        borderColor: "#666",
-        borderStyle: this.state.isDragActive ? "solid" : "dashed"
-      };
-   
-      var messageStyle = {
-        display: "table-cell",
-        width: size,
-        height: size,
-        textAlign: "center",
-        verticalAlign: "middle",
-        fontSize: "10pt",
-        textTransform: "uppercase",
-        color: "#666"
-      };
+    var className = this.props.className || 'dropzone';
+    if (this.state.isDragActive) {
+      className += ' active';
+    };
+
+    var style = {
+      width: this.props.size || 100,
+      height: this.props.size || 100,
+      borderStyle: this.state.isDragActive ? "solid" : "dashed"
+    };
+
+    if (this.props.className) {
+      style = this.props.style;
+    }
 
     return (
-      React.createElement("div", {className: "dropzone", style: dropzoneStyle, onDragLeave: this.handleDragLeave, onDragOver: this.handleDragOver, onDrop: this.handleDrop}, 
-        this.props.children || React.createElement("span", {style: messageStyle}, this.props.message || "Drop Here")
+      React.createElement("div", {className: className, style: style, onClick: this.onClick, onDragLeave: this.onDragLeave, onDragOver: this.onDragOver, onDrop: this.onDrop}, 
+        React.createElement("input", {style: {display: 'none'}, type: "file", multiple: true, ref: "fileInput", onChange: this.onDrop}), 
+        this.props.children
       )
     );
   }
@@ -3744,7 +4136,8 @@ var Dropzone = React.createClass({displayName: "Dropzone",
 });
 
 module.exports = Dropzone;
-},{"react":160}],15:[function(require,module,exports){
+
+},{"react":162}],17:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -3771,7 +4164,7 @@ var AutoFocusMixin = {
 
 module.exports = AutoFocusMixin;
 
-},{"./focusNode":125}],16:[function(require,module,exports){
+},{"./focusNode":127}],18:[function(require,module,exports){
 /**
  * Copyright 2013 Facebook, Inc.
  * All rights reserved.
@@ -3993,7 +4386,7 @@ var BeforeInputEventPlugin = {
 
 module.exports = BeforeInputEventPlugin;
 
-},{"./EventConstants":29,"./EventPropagators":34,"./ExecutionEnvironment":35,"./SyntheticInputEvent":103,"./keyOf":147}],17:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPropagators":36,"./ExecutionEnvironment":37,"./SyntheticInputEvent":105,"./keyOf":149}],19:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -4112,7 +4505,7 @@ var CSSProperty = {
 
 module.exports = CSSProperty;
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -4247,7 +4640,7 @@ var CSSPropertyOperations = {
 module.exports = CSSPropertyOperations;
 
 }).call(this,require('_process'))
-},{"./CSSProperty":17,"./ExecutionEnvironment":35,"./camelizeStyleName":114,"./dangerousStyleValue":119,"./hyphenateStyleName":138,"./memoizeStringOnly":149,"./warning":159,"_process":12}],19:[function(require,module,exports){
+},{"./CSSProperty":19,"./ExecutionEnvironment":37,"./camelizeStyleName":116,"./dangerousStyleValue":121,"./hyphenateStyleName":140,"./memoizeStringOnly":151,"./warning":161,"_process":14}],21:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -4347,7 +4740,7 @@ PooledClass.addPoolingTo(CallbackQueue);
 module.exports = CallbackQueue;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./PooledClass":41,"./invariant":140,"_process":12}],20:[function(require,module,exports){
+},{"./Object.assign":42,"./PooledClass":43,"./invariant":142,"_process":14}],22:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -4729,7 +5122,7 @@ var ChangeEventPlugin = {
 
 module.exports = ChangeEventPlugin;
 
-},{"./EventConstants":29,"./EventPluginHub":31,"./EventPropagators":34,"./ExecutionEnvironment":35,"./ReactUpdates":93,"./SyntheticEvent":101,"./isEventSupported":141,"./isTextInputElement":143,"./keyOf":147}],21:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPluginHub":33,"./EventPropagators":36,"./ExecutionEnvironment":37,"./ReactUpdates":95,"./SyntheticEvent":103,"./isEventSupported":143,"./isTextInputElement":145,"./keyOf":149}],23:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -4754,7 +5147,7 @@ var ClientReactRootIndex = {
 
 module.exports = ClientReactRootIndex;
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -5013,7 +5406,7 @@ var CompositionEventPlugin = {
 
 module.exports = CompositionEventPlugin;
 
-},{"./EventConstants":29,"./EventPropagators":34,"./ExecutionEnvironment":35,"./ReactInputSelection":73,"./SyntheticCompositionEvent":99,"./getTextContentAccessor":135,"./keyOf":147}],23:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPropagators":36,"./ExecutionEnvironment":37,"./ReactInputSelection":75,"./SyntheticCompositionEvent":101,"./getTextContentAccessor":137,"./keyOf":149}],25:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -5188,7 +5581,7 @@ var DOMChildrenOperations = {
 module.exports = DOMChildrenOperations;
 
 }).call(this,require('_process'))
-},{"./Danger":26,"./ReactMultiChildUpdateTypes":79,"./getTextContentAccessor":135,"./invariant":140,"_process":12}],24:[function(require,module,exports){
+},{"./Danger":28,"./ReactMultiChildUpdateTypes":81,"./getTextContentAccessor":137,"./invariant":142,"_process":14}],26:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -5487,7 +5880,7 @@ var DOMProperty = {
 module.exports = DOMProperty;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],25:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],27:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -5684,7 +6077,7 @@ var DOMPropertyOperations = {
 module.exports = DOMPropertyOperations;
 
 }).call(this,require('_process'))
-},{"./DOMProperty":24,"./escapeTextForBrowser":123,"./memoizeStringOnly":149,"./warning":159,"_process":12}],26:[function(require,module,exports){
+},{"./DOMProperty":26,"./escapeTextForBrowser":125,"./memoizeStringOnly":151,"./warning":161,"_process":14}],28:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -5870,7 +6263,7 @@ var Danger = {
 module.exports = Danger;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":35,"./createNodesFromMarkup":118,"./emptyFunction":121,"./getMarkupWrap":132,"./invariant":140,"_process":12}],27:[function(require,module,exports){
+},{"./ExecutionEnvironment":37,"./createNodesFromMarkup":120,"./emptyFunction":123,"./getMarkupWrap":134,"./invariant":142,"_process":14}],29:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -5910,7 +6303,7 @@ var DefaultEventPluginOrder = [
 
 module.exports = DefaultEventPluginOrder;
 
-},{"./keyOf":147}],28:[function(require,module,exports){
+},{"./keyOf":149}],30:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -6050,7 +6443,7 @@ var EnterLeaveEventPlugin = {
 
 module.exports = EnterLeaveEventPlugin;
 
-},{"./EventConstants":29,"./EventPropagators":34,"./ReactMount":77,"./SyntheticMouseEvent":105,"./keyOf":147}],29:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPropagators":36,"./ReactMount":79,"./SyntheticMouseEvent":107,"./keyOf":149}],31:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -6122,7 +6515,7 @@ var EventConstants = {
 
 module.exports = EventConstants;
 
-},{"./keyMirror":146}],30:[function(require,module,exports){
+},{"./keyMirror":148}],32:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014 Facebook, Inc.
@@ -6212,7 +6605,7 @@ var EventListener = {
 module.exports = EventListener;
 
 }).call(this,require('_process'))
-},{"./emptyFunction":121,"_process":12}],31:[function(require,module,exports){
+},{"./emptyFunction":123,"_process":14}],33:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -6488,7 +6881,7 @@ var EventPluginHub = {
 module.exports = EventPluginHub;
 
 }).call(this,require('_process'))
-},{"./EventPluginRegistry":32,"./EventPluginUtils":33,"./accumulateInto":111,"./forEachAccumulated":126,"./invariant":140,"_process":12}],32:[function(require,module,exports){
+},{"./EventPluginRegistry":34,"./EventPluginUtils":35,"./accumulateInto":113,"./forEachAccumulated":128,"./invariant":142,"_process":14}],34:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -6768,7 +7161,7 @@ var EventPluginRegistry = {
 module.exports = EventPluginRegistry;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],33:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],35:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -6989,7 +7382,7 @@ var EventPluginUtils = {
 module.exports = EventPluginUtils;
 
 }).call(this,require('_process'))
-},{"./EventConstants":29,"./invariant":140,"_process":12}],34:[function(require,module,exports){
+},{"./EventConstants":31,"./invariant":142,"_process":14}],36:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -7131,7 +7524,7 @@ var EventPropagators = {
 module.exports = EventPropagators;
 
 }).call(this,require('_process'))
-},{"./EventConstants":29,"./EventPluginHub":31,"./accumulateInto":111,"./forEachAccumulated":126,"_process":12}],35:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPluginHub":33,"./accumulateInto":113,"./forEachAccumulated":128,"_process":14}],37:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -7176,7 +7569,7 @@ var ExecutionEnvironment = {
 
 module.exports = ExecutionEnvironment;
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -7368,7 +7761,7 @@ var HTMLDOMPropertyConfig = {
 
 module.exports = HTMLDOMPropertyConfig;
 
-},{"./DOMProperty":24,"./ExecutionEnvironment":35}],37:[function(require,module,exports){
+},{"./DOMProperty":26,"./ExecutionEnvironment":37}],39:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -7524,7 +7917,7 @@ var LinkedValueUtils = {
 module.exports = LinkedValueUtils;
 
 }).call(this,require('_process'))
-},{"./ReactPropTypes":86,"./invariant":140,"_process":12}],38:[function(require,module,exports){
+},{"./ReactPropTypes":88,"./invariant":142,"_process":14}],40:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -7574,7 +7967,7 @@ var LocalEventTrapMixin = {
 module.exports = LocalEventTrapMixin;
 
 }).call(this,require('_process'))
-},{"./ReactBrowserEventEmitter":44,"./accumulateInto":111,"./forEachAccumulated":126,"./invariant":140,"_process":12}],39:[function(require,module,exports){
+},{"./ReactBrowserEventEmitter":46,"./accumulateInto":113,"./forEachAccumulated":128,"./invariant":142,"_process":14}],41:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -7632,7 +8025,7 @@ var MobileSafariClickEventPlugin = {
 
 module.exports = MobileSafariClickEventPlugin;
 
-},{"./EventConstants":29,"./emptyFunction":121}],40:[function(require,module,exports){
+},{"./EventConstants":31,"./emptyFunction":123}],42:[function(require,module,exports){
 /**
  * Copyright 2014, Facebook, Inc.
  * All rights reserved.
@@ -7679,7 +8072,7 @@ function assign(target, sources) {
 
 module.exports = assign;
 
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -7795,7 +8188,7 @@ var PooledClass = {
 module.exports = PooledClass;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],42:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],44:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -7983,7 +8376,7 @@ React.version = '0.12.2';
 module.exports = React;
 
 }).call(this,require('_process'))
-},{"./DOMPropertyOperations":25,"./EventPluginUtils":33,"./ExecutionEnvironment":35,"./Object.assign":40,"./ReactChildren":45,"./ReactComponent":46,"./ReactCompositeComponent":48,"./ReactContext":49,"./ReactCurrentOwner":50,"./ReactDOM":51,"./ReactDOMComponent":53,"./ReactDefaultInjection":63,"./ReactElement":66,"./ReactElementValidator":67,"./ReactInstanceHandles":74,"./ReactLegacyElement":75,"./ReactMount":77,"./ReactMultiChild":78,"./ReactPerf":82,"./ReactPropTypes":86,"./ReactServerRendering":90,"./ReactTextComponent":92,"./deprecated":120,"./onlyChild":151,"_process":12}],43:[function(require,module,exports){
+},{"./DOMPropertyOperations":27,"./EventPluginUtils":35,"./ExecutionEnvironment":37,"./Object.assign":42,"./ReactChildren":47,"./ReactComponent":48,"./ReactCompositeComponent":50,"./ReactContext":51,"./ReactCurrentOwner":52,"./ReactDOM":53,"./ReactDOMComponent":55,"./ReactDefaultInjection":65,"./ReactElement":68,"./ReactElementValidator":69,"./ReactInstanceHandles":76,"./ReactLegacyElement":77,"./ReactMount":79,"./ReactMultiChild":80,"./ReactPerf":84,"./ReactPropTypes":88,"./ReactServerRendering":92,"./ReactTextComponent":94,"./deprecated":122,"./onlyChild":153,"_process":14}],45:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -8026,7 +8419,7 @@ var ReactBrowserComponentMixin = {
 module.exports = ReactBrowserComponentMixin;
 
 }).call(this,require('_process'))
-},{"./ReactEmptyComponent":68,"./ReactMount":77,"./invariant":140,"_process":12}],44:[function(require,module,exports){
+},{"./ReactEmptyComponent":70,"./ReactMount":79,"./invariant":142,"_process":14}],46:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -8381,7 +8774,7 @@ var ReactBrowserEventEmitter = assign({}, ReactEventEmitterMixin, {
 
 module.exports = ReactBrowserEventEmitter;
 
-},{"./EventConstants":29,"./EventPluginHub":31,"./EventPluginRegistry":32,"./Object.assign":40,"./ReactEventEmitterMixin":70,"./ViewportMetrics":110,"./isEventSupported":141}],45:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPluginHub":33,"./EventPluginRegistry":34,"./Object.assign":42,"./ReactEventEmitterMixin":72,"./ViewportMetrics":112,"./isEventSupported":143}],47:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -8531,7 +8924,7 @@ var ReactChildren = {
 module.exports = ReactChildren;
 
 }).call(this,require('_process'))
-},{"./PooledClass":41,"./traverseAllChildren":158,"./warning":159,"_process":12}],46:[function(require,module,exports){
+},{"./PooledClass":43,"./traverseAllChildren":160,"./warning":161,"_process":14}],48:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -8974,7 +9367,7 @@ var ReactComponent = {
 module.exports = ReactComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./ReactElement":66,"./ReactOwner":81,"./ReactUpdates":93,"./invariant":140,"./keyMirror":146,"_process":12}],47:[function(require,module,exports){
+},{"./Object.assign":42,"./ReactElement":68,"./ReactOwner":83,"./ReactUpdates":95,"./invariant":142,"./keyMirror":148,"_process":14}],49:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -9096,7 +9489,7 @@ var ReactComponentBrowserEnvironment = {
 module.exports = ReactComponentBrowserEnvironment;
 
 }).call(this,require('_process'))
-},{"./ReactDOMIDOperations":55,"./ReactMarkupChecksum":76,"./ReactMount":77,"./ReactPerf":82,"./ReactReconcileTransaction":88,"./getReactRootElementInContainer":134,"./invariant":140,"./setInnerHTML":154,"_process":12}],48:[function(require,module,exports){
+},{"./ReactDOMIDOperations":57,"./ReactMarkupChecksum":78,"./ReactMount":79,"./ReactPerf":84,"./ReactReconcileTransaction":90,"./getReactRootElementInContainer":136,"./invariant":142,"./setInnerHTML":156,"_process":14}],50:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -10536,7 +10929,7 @@ var ReactCompositeComponent = {
 module.exports = ReactCompositeComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./ReactComponent":46,"./ReactContext":49,"./ReactCurrentOwner":50,"./ReactElement":66,"./ReactElementValidator":67,"./ReactEmptyComponent":68,"./ReactErrorUtils":69,"./ReactLegacyElement":75,"./ReactOwner":81,"./ReactPerf":82,"./ReactPropTransferer":83,"./ReactPropTypeLocationNames":84,"./ReactPropTypeLocations":85,"./ReactUpdates":93,"./instantiateReactComponent":139,"./invariant":140,"./keyMirror":146,"./keyOf":147,"./mapObject":148,"./monitorCodeUse":150,"./shouldUpdateReactComponent":156,"./warning":159,"_process":12}],49:[function(require,module,exports){
+},{"./Object.assign":42,"./ReactComponent":48,"./ReactContext":51,"./ReactCurrentOwner":52,"./ReactElement":68,"./ReactElementValidator":69,"./ReactEmptyComponent":70,"./ReactErrorUtils":71,"./ReactLegacyElement":77,"./ReactOwner":83,"./ReactPerf":84,"./ReactPropTransferer":85,"./ReactPropTypeLocationNames":86,"./ReactPropTypeLocations":87,"./ReactUpdates":95,"./instantiateReactComponent":141,"./invariant":142,"./keyMirror":148,"./keyOf":149,"./mapObject":150,"./monitorCodeUse":152,"./shouldUpdateReactComponent":158,"./warning":161,"_process":14}],51:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -10598,7 +10991,7 @@ var ReactContext = {
 
 module.exports = ReactContext;
 
-},{"./Object.assign":40}],50:[function(require,module,exports){
+},{"./Object.assign":42}],52:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -10632,7 +11025,7 @@ var ReactCurrentOwner = {
 
 module.exports = ReactCurrentOwner;
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -10815,7 +11208,7 @@ var ReactDOM = mapObject({
 module.exports = ReactDOM;
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./ReactElementValidator":67,"./ReactLegacyElement":75,"./mapObject":148,"_process":12}],52:[function(require,module,exports){
+},{"./ReactElement":68,"./ReactElementValidator":69,"./ReactLegacyElement":77,"./mapObject":150,"_process":14}],54:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -10880,7 +11273,7 @@ var ReactDOMButton = ReactCompositeComponent.createClass({
 
 module.exports = ReactDOMButton;
 
-},{"./AutoFocusMixin":15,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66,"./keyMirror":146}],53:[function(require,module,exports){
+},{"./AutoFocusMixin":17,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68,"./keyMirror":148}],55:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -11367,7 +11760,7 @@ assign(
 module.exports = ReactDOMComponent;
 
 }).call(this,require('_process'))
-},{"./CSSPropertyOperations":18,"./DOMProperty":24,"./DOMPropertyOperations":25,"./Object.assign":40,"./ReactBrowserComponentMixin":43,"./ReactBrowserEventEmitter":44,"./ReactComponent":46,"./ReactMount":77,"./ReactMultiChild":78,"./ReactPerf":82,"./escapeTextForBrowser":123,"./invariant":140,"./isEventSupported":141,"./keyOf":147,"./monitorCodeUse":150,"_process":12}],54:[function(require,module,exports){
+},{"./CSSPropertyOperations":20,"./DOMProperty":26,"./DOMPropertyOperations":27,"./Object.assign":42,"./ReactBrowserComponentMixin":45,"./ReactBrowserEventEmitter":46,"./ReactComponent":48,"./ReactMount":79,"./ReactMultiChild":80,"./ReactPerf":84,"./escapeTextForBrowser":125,"./invariant":142,"./isEventSupported":143,"./keyOf":149,"./monitorCodeUse":152,"_process":14}],56:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -11417,7 +11810,7 @@ var ReactDOMForm = ReactCompositeComponent.createClass({
 
 module.exports = ReactDOMForm;
 
-},{"./EventConstants":29,"./LocalEventTrapMixin":38,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66}],55:[function(require,module,exports){
+},{"./EventConstants":31,"./LocalEventTrapMixin":40,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68}],57:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -11603,7 +11996,7 @@ var ReactDOMIDOperations = {
 module.exports = ReactDOMIDOperations;
 
 }).call(this,require('_process'))
-},{"./CSSPropertyOperations":18,"./DOMChildrenOperations":23,"./DOMPropertyOperations":25,"./ReactMount":77,"./ReactPerf":82,"./invariant":140,"./setInnerHTML":154,"_process":12}],56:[function(require,module,exports){
+},{"./CSSPropertyOperations":20,"./DOMChildrenOperations":25,"./DOMPropertyOperations":27,"./ReactMount":79,"./ReactPerf":84,"./invariant":142,"./setInnerHTML":156,"_process":14}],58:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -11651,7 +12044,7 @@ var ReactDOMImg = ReactCompositeComponent.createClass({
 
 module.exports = ReactDOMImg;
 
-},{"./EventConstants":29,"./LocalEventTrapMixin":38,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66}],57:[function(require,module,exports){
+},{"./EventConstants":31,"./LocalEventTrapMixin":40,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68}],59:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -11829,7 +12222,7 @@ var ReactDOMInput = ReactCompositeComponent.createClass({
 module.exports = ReactDOMInput;
 
 }).call(this,require('_process'))
-},{"./AutoFocusMixin":15,"./DOMPropertyOperations":25,"./LinkedValueUtils":37,"./Object.assign":40,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66,"./ReactMount":77,"./ReactUpdates":93,"./invariant":140,"_process":12}],58:[function(require,module,exports){
+},{"./AutoFocusMixin":17,"./DOMPropertyOperations":27,"./LinkedValueUtils":39,"./Object.assign":42,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68,"./ReactMount":79,"./ReactUpdates":95,"./invariant":142,"_process":14}],60:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -11882,7 +12275,7 @@ var ReactDOMOption = ReactCompositeComponent.createClass({
 module.exports = ReactDOMOption;
 
 }).call(this,require('_process'))
-},{"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66,"./warning":159,"_process":12}],59:[function(require,module,exports){
+},{"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68,"./warning":161,"_process":14}],61:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -12066,7 +12459,7 @@ var ReactDOMSelect = ReactCompositeComponent.createClass({
 
 module.exports = ReactDOMSelect;
 
-},{"./AutoFocusMixin":15,"./LinkedValueUtils":37,"./Object.assign":40,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66,"./ReactUpdates":93}],60:[function(require,module,exports){
+},{"./AutoFocusMixin":17,"./LinkedValueUtils":39,"./Object.assign":42,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68,"./ReactUpdates":95}],62:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -12275,7 +12668,7 @@ var ReactDOMSelection = {
 
 module.exports = ReactDOMSelection;
 
-},{"./ExecutionEnvironment":35,"./getNodeForCharacterOffset":133,"./getTextContentAccessor":135}],61:[function(require,module,exports){
+},{"./ExecutionEnvironment":37,"./getNodeForCharacterOffset":135,"./getTextContentAccessor":137}],63:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -12416,7 +12809,7 @@ var ReactDOMTextarea = ReactCompositeComponent.createClass({
 module.exports = ReactDOMTextarea;
 
 }).call(this,require('_process'))
-},{"./AutoFocusMixin":15,"./DOMPropertyOperations":25,"./LinkedValueUtils":37,"./Object.assign":40,"./ReactBrowserComponentMixin":43,"./ReactCompositeComponent":48,"./ReactDOM":51,"./ReactElement":66,"./ReactUpdates":93,"./invariant":140,"./warning":159,"_process":12}],62:[function(require,module,exports){
+},{"./AutoFocusMixin":17,"./DOMPropertyOperations":27,"./LinkedValueUtils":39,"./Object.assign":42,"./ReactBrowserComponentMixin":45,"./ReactCompositeComponent":50,"./ReactDOM":53,"./ReactElement":68,"./ReactUpdates":95,"./invariant":142,"./warning":161,"_process":14}],64:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -12489,7 +12882,7 @@ var ReactDefaultBatchingStrategy = {
 
 module.exports = ReactDefaultBatchingStrategy;
 
-},{"./Object.assign":40,"./ReactUpdates":93,"./Transaction":109,"./emptyFunction":121}],63:[function(require,module,exports){
+},{"./Object.assign":42,"./ReactUpdates":95,"./Transaction":111,"./emptyFunction":123}],65:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -12618,7 +13011,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./BeforeInputEventPlugin":16,"./ChangeEventPlugin":20,"./ClientReactRootIndex":21,"./CompositionEventPlugin":22,"./DefaultEventPluginOrder":27,"./EnterLeaveEventPlugin":28,"./ExecutionEnvironment":35,"./HTMLDOMPropertyConfig":36,"./MobileSafariClickEventPlugin":39,"./ReactBrowserComponentMixin":43,"./ReactComponentBrowserEnvironment":47,"./ReactDOMButton":52,"./ReactDOMComponent":53,"./ReactDOMForm":54,"./ReactDOMImg":56,"./ReactDOMInput":57,"./ReactDOMOption":58,"./ReactDOMSelect":59,"./ReactDOMTextarea":61,"./ReactDefaultBatchingStrategy":62,"./ReactDefaultPerf":64,"./ReactEventListener":71,"./ReactInjection":72,"./ReactInstanceHandles":74,"./ReactMount":77,"./SVGDOMPropertyConfig":94,"./SelectEventPlugin":95,"./ServerReactRootIndex":96,"./SimpleEventPlugin":97,"./createFullPageComponent":117,"_process":12}],64:[function(require,module,exports){
+},{"./BeforeInputEventPlugin":18,"./ChangeEventPlugin":22,"./ClientReactRootIndex":23,"./CompositionEventPlugin":24,"./DefaultEventPluginOrder":29,"./EnterLeaveEventPlugin":30,"./ExecutionEnvironment":37,"./HTMLDOMPropertyConfig":38,"./MobileSafariClickEventPlugin":41,"./ReactBrowserComponentMixin":45,"./ReactComponentBrowserEnvironment":49,"./ReactDOMButton":54,"./ReactDOMComponent":55,"./ReactDOMForm":56,"./ReactDOMImg":58,"./ReactDOMInput":59,"./ReactDOMOption":60,"./ReactDOMSelect":61,"./ReactDOMTextarea":63,"./ReactDefaultBatchingStrategy":64,"./ReactDefaultPerf":66,"./ReactEventListener":73,"./ReactInjection":74,"./ReactInstanceHandles":76,"./ReactMount":79,"./SVGDOMPropertyConfig":96,"./SelectEventPlugin":97,"./ServerReactRootIndex":98,"./SimpleEventPlugin":99,"./createFullPageComponent":119,"_process":14}],66:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -12878,7 +13271,7 @@ var ReactDefaultPerf = {
 
 module.exports = ReactDefaultPerf;
 
-},{"./DOMProperty":24,"./ReactDefaultPerfAnalysis":65,"./ReactMount":77,"./ReactPerf":82,"./performanceNow":153}],65:[function(require,module,exports){
+},{"./DOMProperty":26,"./ReactDefaultPerfAnalysis":67,"./ReactMount":79,"./ReactPerf":84,"./performanceNow":155}],67:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -13084,7 +13477,7 @@ var ReactDefaultPerfAnalysis = {
 
 module.exports = ReactDefaultPerfAnalysis;
 
-},{"./Object.assign":40}],66:[function(require,module,exports){
+},{"./Object.assign":42}],68:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -13330,7 +13723,7 @@ ReactElement.isValidElement = function(object) {
 module.exports = ReactElement;
 
 }).call(this,require('_process'))
-},{"./ReactContext":49,"./ReactCurrentOwner":50,"./warning":159,"_process":12}],67:[function(require,module,exports){
+},{"./ReactContext":51,"./ReactCurrentOwner":52,"./warning":161,"_process":14}],69:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -13612,7 +14005,7 @@ var ReactElementValidator = {
 module.exports = ReactElementValidator;
 
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":50,"./ReactElement":66,"./ReactPropTypeLocations":85,"./monitorCodeUse":150,"./warning":159,"_process":12}],68:[function(require,module,exports){
+},{"./ReactCurrentOwner":52,"./ReactElement":68,"./ReactPropTypeLocations":87,"./monitorCodeUse":152,"./warning":161,"_process":14}],70:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -13689,7 +14082,7 @@ var ReactEmptyComponent = {
 module.exports = ReactEmptyComponent;
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./invariant":140,"_process":12}],69:[function(require,module,exports){
+},{"./ReactElement":68,"./invariant":142,"_process":14}],71:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -13721,7 +14114,7 @@ var ReactErrorUtils = {
 
 module.exports = ReactErrorUtils;
 
-},{}],70:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -13771,7 +14164,7 @@ var ReactEventEmitterMixin = {
 
 module.exports = ReactEventEmitterMixin;
 
-},{"./EventPluginHub":31}],71:[function(require,module,exports){
+},{"./EventPluginHub":33}],73:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -13955,7 +14348,7 @@ var ReactEventListener = {
 
 module.exports = ReactEventListener;
 
-},{"./EventListener":30,"./ExecutionEnvironment":35,"./Object.assign":40,"./PooledClass":41,"./ReactInstanceHandles":74,"./ReactMount":77,"./ReactUpdates":93,"./getEventTarget":131,"./getUnboundedScrollPosition":136}],72:[function(require,module,exports){
+},{"./EventListener":32,"./ExecutionEnvironment":37,"./Object.assign":42,"./PooledClass":43,"./ReactInstanceHandles":76,"./ReactMount":79,"./ReactUpdates":95,"./getEventTarget":133,"./getUnboundedScrollPosition":138}],74:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -13995,7 +14388,7 @@ var ReactInjection = {
 
 module.exports = ReactInjection;
 
-},{"./DOMProperty":24,"./EventPluginHub":31,"./ReactBrowserEventEmitter":44,"./ReactComponent":46,"./ReactCompositeComponent":48,"./ReactEmptyComponent":68,"./ReactNativeComponent":80,"./ReactPerf":82,"./ReactRootIndex":89,"./ReactUpdates":93}],73:[function(require,module,exports){
+},{"./DOMProperty":26,"./EventPluginHub":33,"./ReactBrowserEventEmitter":46,"./ReactComponent":48,"./ReactCompositeComponent":50,"./ReactEmptyComponent":70,"./ReactNativeComponent":82,"./ReactPerf":84,"./ReactRootIndex":91,"./ReactUpdates":95}],75:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -14131,7 +14524,7 @@ var ReactInputSelection = {
 
 module.exports = ReactInputSelection;
 
-},{"./ReactDOMSelection":60,"./containsNode":115,"./focusNode":125,"./getActiveElement":127}],74:[function(require,module,exports){
+},{"./ReactDOMSelection":62,"./containsNode":117,"./focusNode":127,"./getActiveElement":129}],76:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -14466,7 +14859,7 @@ var ReactInstanceHandles = {
 module.exports = ReactInstanceHandles;
 
 }).call(this,require('_process'))
-},{"./ReactRootIndex":89,"./invariant":140,"_process":12}],75:[function(require,module,exports){
+},{"./ReactRootIndex":91,"./invariant":142,"_process":14}],77:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -14713,7 +15106,7 @@ ReactLegacyElementFactory._isLegacyCallWarningEnabled = true;
 module.exports = ReactLegacyElementFactory;
 
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":50,"./invariant":140,"./monitorCodeUse":150,"./warning":159,"_process":12}],76:[function(require,module,exports){
+},{"./ReactCurrentOwner":52,"./invariant":142,"./monitorCodeUse":152,"./warning":161,"_process":14}],78:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -14761,7 +15154,7 @@ var ReactMarkupChecksum = {
 
 module.exports = ReactMarkupChecksum;
 
-},{"./adler32":112}],77:[function(require,module,exports){
+},{"./adler32":114}],79:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -15459,7 +15852,7 @@ ReactMount.renderComponent = deprecated(
 module.exports = ReactMount;
 
 }).call(this,require('_process'))
-},{"./DOMProperty":24,"./ReactBrowserEventEmitter":44,"./ReactCurrentOwner":50,"./ReactElement":66,"./ReactInstanceHandles":74,"./ReactLegacyElement":75,"./ReactPerf":82,"./containsNode":115,"./deprecated":120,"./getReactRootElementInContainer":134,"./instantiateReactComponent":139,"./invariant":140,"./shouldUpdateReactComponent":156,"./warning":159,"_process":12}],78:[function(require,module,exports){
+},{"./DOMProperty":26,"./ReactBrowserEventEmitter":46,"./ReactCurrentOwner":52,"./ReactElement":68,"./ReactInstanceHandles":76,"./ReactLegacyElement":77,"./ReactPerf":84,"./containsNode":117,"./deprecated":122,"./getReactRootElementInContainer":136,"./instantiateReactComponent":141,"./invariant":142,"./shouldUpdateReactComponent":158,"./warning":161,"_process":14}],80:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -15887,7 +16280,7 @@ var ReactMultiChild = {
 
 module.exports = ReactMultiChild;
 
-},{"./ReactComponent":46,"./ReactMultiChildUpdateTypes":79,"./flattenChildren":124,"./instantiateReactComponent":139,"./shouldUpdateReactComponent":156}],79:[function(require,module,exports){
+},{"./ReactComponent":48,"./ReactMultiChildUpdateTypes":81,"./flattenChildren":126,"./instantiateReactComponent":141,"./shouldUpdateReactComponent":158}],81:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -15920,7 +16313,7 @@ var ReactMultiChildUpdateTypes = keyMirror({
 
 module.exports = ReactMultiChildUpdateTypes;
 
-},{"./keyMirror":146}],80:[function(require,module,exports){
+},{"./keyMirror":148}],82:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -15993,7 +16386,7 @@ var ReactNativeComponent = {
 module.exports = ReactNativeComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./invariant":140,"_process":12}],81:[function(require,module,exports){
+},{"./Object.assign":42,"./invariant":142,"_process":14}],83:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -16149,7 +16542,7 @@ var ReactOwner = {
 module.exports = ReactOwner;
 
 }).call(this,require('_process'))
-},{"./emptyObject":122,"./invariant":140,"_process":12}],82:[function(require,module,exports){
+},{"./emptyObject":124,"./invariant":142,"_process":14}],84:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -16233,7 +16626,7 @@ function _noMeasure(objName, fnName, func) {
 module.exports = ReactPerf;
 
 }).call(this,require('_process'))
-},{"_process":12}],83:[function(require,module,exports){
+},{"_process":14}],85:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -16400,7 +16793,7 @@ var ReactPropTransferer = {
 module.exports = ReactPropTransferer;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./emptyFunction":121,"./invariant":140,"./joinClasses":145,"./warning":159,"_process":12}],84:[function(require,module,exports){
+},{"./Object.assign":42,"./emptyFunction":123,"./invariant":142,"./joinClasses":147,"./warning":161,"_process":14}],86:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -16428,7 +16821,7 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = ReactPropTypeLocationNames;
 
 }).call(this,require('_process'))
-},{"_process":12}],85:[function(require,module,exports){
+},{"_process":14}],87:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -16452,7 +16845,7 @@ var ReactPropTypeLocations = keyMirror({
 
 module.exports = ReactPropTypeLocations;
 
-},{"./keyMirror":146}],86:[function(require,module,exports){
+},{"./keyMirror":148}],88:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -16806,7 +17199,7 @@ function getPreciseType(propValue) {
 
 module.exports = ReactPropTypes;
 
-},{"./ReactElement":66,"./ReactPropTypeLocationNames":84,"./deprecated":120,"./emptyFunction":121}],87:[function(require,module,exports){
+},{"./ReactElement":68,"./ReactPropTypeLocationNames":86,"./deprecated":122,"./emptyFunction":123}],89:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -16862,7 +17255,7 @@ PooledClass.addPoolingTo(ReactPutListenerQueue);
 
 module.exports = ReactPutListenerQueue;
 
-},{"./Object.assign":40,"./PooledClass":41,"./ReactBrowserEventEmitter":44}],88:[function(require,module,exports){
+},{"./Object.assign":42,"./PooledClass":43,"./ReactBrowserEventEmitter":46}],90:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17038,7 +17431,7 @@ PooledClass.addPoolingTo(ReactReconcileTransaction);
 
 module.exports = ReactReconcileTransaction;
 
-},{"./CallbackQueue":19,"./Object.assign":40,"./PooledClass":41,"./ReactBrowserEventEmitter":44,"./ReactInputSelection":73,"./ReactPutListenerQueue":87,"./Transaction":109}],89:[function(require,module,exports){
+},{"./CallbackQueue":21,"./Object.assign":42,"./PooledClass":43,"./ReactBrowserEventEmitter":46,"./ReactInputSelection":75,"./ReactPutListenerQueue":89,"./Transaction":111}],91:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17069,7 +17462,7 @@ var ReactRootIndex = {
 
 module.exports = ReactRootIndex;
 
-},{}],90:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -17149,7 +17542,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./ReactInstanceHandles":74,"./ReactMarkupChecksum":76,"./ReactServerRenderingTransaction":91,"./instantiateReactComponent":139,"./invariant":140,"_process":12}],91:[function(require,module,exports){
+},{"./ReactElement":68,"./ReactInstanceHandles":76,"./ReactMarkupChecksum":78,"./ReactServerRenderingTransaction":93,"./instantiateReactComponent":141,"./invariant":142,"_process":14}],93:[function(require,module,exports){
 /**
  * Copyright 2014, Facebook, Inc.
  * All rights reserved.
@@ -17262,7 +17655,7 @@ PooledClass.addPoolingTo(ReactServerRenderingTransaction);
 
 module.exports = ReactServerRenderingTransaction;
 
-},{"./CallbackQueue":19,"./Object.assign":40,"./PooledClass":41,"./ReactPutListenerQueue":87,"./Transaction":109,"./emptyFunction":121}],92:[function(require,module,exports){
+},{"./CallbackQueue":21,"./Object.assign":42,"./PooledClass":43,"./ReactPutListenerQueue":89,"./Transaction":111,"./emptyFunction":123}],94:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17368,7 +17761,7 @@ ReactTextComponentFactory.type = ReactTextComponent;
 
 module.exports = ReactTextComponentFactory;
 
-},{"./DOMPropertyOperations":25,"./Object.assign":40,"./ReactComponent":46,"./ReactElement":66,"./escapeTextForBrowser":123}],93:[function(require,module,exports){
+},{"./DOMPropertyOperations":27,"./Object.assign":42,"./ReactComponent":48,"./ReactElement":68,"./escapeTextForBrowser":125}],95:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -17658,7 +18051,7 @@ var ReactUpdates = {
 module.exports = ReactUpdates;
 
 }).call(this,require('_process'))
-},{"./CallbackQueue":19,"./Object.assign":40,"./PooledClass":41,"./ReactCurrentOwner":50,"./ReactPerf":82,"./Transaction":109,"./invariant":140,"./warning":159,"_process":12}],94:[function(require,module,exports){
+},{"./CallbackQueue":21,"./Object.assign":42,"./PooledClass":43,"./ReactCurrentOwner":52,"./ReactPerf":84,"./Transaction":111,"./invariant":142,"./warning":161,"_process":14}],96:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17750,7 +18143,7 @@ var SVGDOMPropertyConfig = {
 
 module.exports = SVGDOMPropertyConfig;
 
-},{"./DOMProperty":24}],95:[function(require,module,exports){
+},{"./DOMProperty":26}],97:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17945,7 +18338,7 @@ var SelectEventPlugin = {
 
 module.exports = SelectEventPlugin;
 
-},{"./EventConstants":29,"./EventPropagators":34,"./ReactInputSelection":73,"./SyntheticEvent":101,"./getActiveElement":127,"./isTextInputElement":143,"./keyOf":147,"./shallowEqual":155}],96:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPropagators":36,"./ReactInputSelection":75,"./SyntheticEvent":103,"./getActiveElement":129,"./isTextInputElement":145,"./keyOf":149,"./shallowEqual":157}],98:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -17976,7 +18369,7 @@ var ServerReactRootIndex = {
 
 module.exports = ServerReactRootIndex;
 
-},{}],97:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -18404,7 +18797,7 @@ var SimpleEventPlugin = {
 module.exports = SimpleEventPlugin;
 
 }).call(this,require('_process'))
-},{"./EventConstants":29,"./EventPluginUtils":33,"./EventPropagators":34,"./SyntheticClipboardEvent":98,"./SyntheticDragEvent":100,"./SyntheticEvent":101,"./SyntheticFocusEvent":102,"./SyntheticKeyboardEvent":104,"./SyntheticMouseEvent":105,"./SyntheticTouchEvent":106,"./SyntheticUIEvent":107,"./SyntheticWheelEvent":108,"./getEventCharCode":128,"./invariant":140,"./keyOf":147,"./warning":159,"_process":12}],98:[function(require,module,exports){
+},{"./EventConstants":31,"./EventPluginUtils":35,"./EventPropagators":36,"./SyntheticClipboardEvent":100,"./SyntheticDragEvent":102,"./SyntheticEvent":103,"./SyntheticFocusEvent":104,"./SyntheticKeyboardEvent":106,"./SyntheticMouseEvent":107,"./SyntheticTouchEvent":108,"./SyntheticUIEvent":109,"./SyntheticWheelEvent":110,"./getEventCharCode":130,"./invariant":142,"./keyOf":149,"./warning":161,"_process":14}],100:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18450,7 +18843,7 @@ SyntheticEvent.augmentClass(SyntheticClipboardEvent, ClipboardEventInterface);
 module.exports = SyntheticClipboardEvent;
 
 
-},{"./SyntheticEvent":101}],99:[function(require,module,exports){
+},{"./SyntheticEvent":103}],101:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18496,7 +18889,7 @@ SyntheticEvent.augmentClass(
 module.exports = SyntheticCompositionEvent;
 
 
-},{"./SyntheticEvent":101}],100:[function(require,module,exports){
+},{"./SyntheticEvent":103}],102:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18535,7 +18928,7 @@ SyntheticMouseEvent.augmentClass(SyntheticDragEvent, DragEventInterface);
 
 module.exports = SyntheticDragEvent;
 
-},{"./SyntheticMouseEvent":105}],101:[function(require,module,exports){
+},{"./SyntheticMouseEvent":107}],103:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18693,7 +19086,7 @@ PooledClass.addPoolingTo(SyntheticEvent, PooledClass.threeArgumentPooler);
 
 module.exports = SyntheticEvent;
 
-},{"./Object.assign":40,"./PooledClass":41,"./emptyFunction":121,"./getEventTarget":131}],102:[function(require,module,exports){
+},{"./Object.assign":42,"./PooledClass":43,"./emptyFunction":123,"./getEventTarget":133}],104:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18732,7 +19125,7 @@ SyntheticUIEvent.augmentClass(SyntheticFocusEvent, FocusEventInterface);
 
 module.exports = SyntheticFocusEvent;
 
-},{"./SyntheticUIEvent":107}],103:[function(require,module,exports){
+},{"./SyntheticUIEvent":109}],105:[function(require,module,exports){
 /**
  * Copyright 2013 Facebook, Inc.
  * All rights reserved.
@@ -18779,7 +19172,7 @@ SyntheticEvent.augmentClass(
 module.exports = SyntheticInputEvent;
 
 
-},{"./SyntheticEvent":101}],104:[function(require,module,exports){
+},{"./SyntheticEvent":103}],106:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18866,7 +19259,7 @@ SyntheticUIEvent.augmentClass(SyntheticKeyboardEvent, KeyboardEventInterface);
 
 module.exports = SyntheticKeyboardEvent;
 
-},{"./SyntheticUIEvent":107,"./getEventCharCode":128,"./getEventKey":129,"./getEventModifierState":130}],105:[function(require,module,exports){
+},{"./SyntheticUIEvent":109,"./getEventCharCode":130,"./getEventKey":131,"./getEventModifierState":132}],107:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18949,7 +19342,7 @@ SyntheticUIEvent.augmentClass(SyntheticMouseEvent, MouseEventInterface);
 
 module.exports = SyntheticMouseEvent;
 
-},{"./SyntheticUIEvent":107,"./ViewportMetrics":110,"./getEventModifierState":130}],106:[function(require,module,exports){
+},{"./SyntheticUIEvent":109,"./ViewportMetrics":112,"./getEventModifierState":132}],108:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -18997,7 +19390,7 @@ SyntheticUIEvent.augmentClass(SyntheticTouchEvent, TouchEventInterface);
 
 module.exports = SyntheticTouchEvent;
 
-},{"./SyntheticUIEvent":107,"./getEventModifierState":130}],107:[function(require,module,exports){
+},{"./SyntheticUIEvent":109,"./getEventModifierState":132}],109:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19059,7 +19452,7 @@ SyntheticEvent.augmentClass(SyntheticUIEvent, UIEventInterface);
 
 module.exports = SyntheticUIEvent;
 
-},{"./SyntheticEvent":101,"./getEventTarget":131}],108:[function(require,module,exports){
+},{"./SyntheticEvent":103,"./getEventTarget":133}],110:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19120,7 +19513,7 @@ SyntheticMouseEvent.augmentClass(SyntheticWheelEvent, WheelEventInterface);
 
 module.exports = SyntheticWheelEvent;
 
-},{"./SyntheticMouseEvent":105}],109:[function(require,module,exports){
+},{"./SyntheticMouseEvent":107}],111:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -19361,7 +19754,7 @@ var Transaction = {
 module.exports = Transaction;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],110:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],112:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19393,7 +19786,7 @@ var ViewportMetrics = {
 
 module.exports = ViewportMetrics;
 
-},{"./getUnboundedScrollPosition":136}],111:[function(require,module,exports){
+},{"./getUnboundedScrollPosition":138}],113:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -19459,7 +19852,7 @@ function accumulateInto(current, next) {
 module.exports = accumulateInto;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],112:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],114:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19493,7 +19886,7 @@ function adler32(data) {
 
 module.exports = adler32;
 
-},{}],113:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19525,7 +19918,7 @@ function camelize(string) {
 
 module.exports = camelize;
 
-},{}],114:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 /**
  * Copyright 2014, Facebook, Inc.
  * All rights reserved.
@@ -19567,7 +19960,7 @@ function camelizeStyleName(string) {
 
 module.exports = camelizeStyleName;
 
-},{"./camelize":113}],115:[function(require,module,exports){
+},{"./camelize":115}],117:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19611,7 +20004,7 @@ function containsNode(outerNode, innerNode) {
 
 module.exports = containsNode;
 
-},{"./isTextNode":144}],116:[function(require,module,exports){
+},{"./isTextNode":146}],118:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19697,7 +20090,7 @@ function createArrayFrom(obj) {
 
 module.exports = createArrayFrom;
 
-},{"./toArray":157}],117:[function(require,module,exports){
+},{"./toArray":159}],119:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -19758,7 +20151,7 @@ function createFullPageComponent(tag) {
 module.exports = createFullPageComponent;
 
 }).call(this,require('_process'))
-},{"./ReactCompositeComponent":48,"./ReactElement":66,"./invariant":140,"_process":12}],118:[function(require,module,exports){
+},{"./ReactCompositeComponent":50,"./ReactElement":68,"./invariant":142,"_process":14}],120:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -19848,7 +20241,7 @@ function createNodesFromMarkup(markup, handleScript) {
 module.exports = createNodesFromMarkup;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":35,"./createArrayFrom":116,"./getMarkupWrap":132,"./invariant":140,"_process":12}],119:[function(require,module,exports){
+},{"./ExecutionEnvironment":37,"./createArrayFrom":118,"./getMarkupWrap":134,"./invariant":142,"_process":14}],121:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19906,7 +20299,7 @@ function dangerousStyleValue(name, value) {
 
 module.exports = dangerousStyleValue;
 
-},{"./CSSProperty":17}],120:[function(require,module,exports){
+},{"./CSSProperty":19}],122:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -19957,7 +20350,7 @@ function deprecated(namespace, oldName, newName, ctx, fn) {
 module.exports = deprecated;
 
 }).call(this,require('_process'))
-},{"./Object.assign":40,"./warning":159,"_process":12}],121:[function(require,module,exports){
+},{"./Object.assign":42,"./warning":161,"_process":14}],123:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -19991,7 +20384,7 @@ emptyFunction.thatReturnsArgument = function(arg) { return arg; };
 
 module.exports = emptyFunction;
 
-},{}],122:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -20015,7 +20408,7 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = emptyObject;
 
 }).call(this,require('_process'))
-},{"_process":12}],123:[function(require,module,exports){
+},{"_process":14}],125:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20056,7 +20449,7 @@ function escapeTextForBrowser(text) {
 
 module.exports = escapeTextForBrowser;
 
-},{}],124:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -20125,7 +20518,7 @@ function flattenChildren(children) {
 module.exports = flattenChildren;
 
 }).call(this,require('_process'))
-},{"./ReactTextComponent":92,"./traverseAllChildren":158,"./warning":159,"_process":12}],125:[function(require,module,exports){
+},{"./ReactTextComponent":94,"./traverseAllChildren":160,"./warning":161,"_process":14}],127:[function(require,module,exports){
 /**
  * Copyright 2014, Facebook, Inc.
  * All rights reserved.
@@ -20154,7 +20547,7 @@ function focusNode(node) {
 
 module.exports = focusNode;
 
-},{}],126:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20185,7 +20578,7 @@ var forEachAccumulated = function(arr, cb, scope) {
 
 module.exports = forEachAccumulated;
 
-},{}],127:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20214,7 +20607,7 @@ function getActiveElement() /*?DOMElement*/ {
 
 module.exports = getActiveElement;
 
-},{}],128:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20266,7 +20659,7 @@ function getEventCharCode(nativeEvent) {
 
 module.exports = getEventCharCode;
 
-},{}],129:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20371,7 +20764,7 @@ function getEventKey(nativeEvent) {
 
 module.exports = getEventKey;
 
-},{"./getEventCharCode":128}],130:[function(require,module,exports){
+},{"./getEventCharCode":130}],132:[function(require,module,exports){
 /**
  * Copyright 2013 Facebook, Inc.
  * All rights reserved.
@@ -20418,7 +20811,7 @@ function getEventModifierState(nativeEvent) {
 
 module.exports = getEventModifierState;
 
-},{}],131:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20449,7 +20842,7 @@ function getEventTarget(nativeEvent) {
 
 module.exports = getEventTarget;
 
-},{}],132:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -20566,7 +20959,7 @@ function getMarkupWrap(nodeName) {
 module.exports = getMarkupWrap;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":35,"./invariant":140,"_process":12}],133:[function(require,module,exports){
+},{"./ExecutionEnvironment":37,"./invariant":142,"_process":14}],135:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20641,7 +21034,7 @@ function getNodeForCharacterOffset(root, offset) {
 
 module.exports = getNodeForCharacterOffset;
 
-},{}],134:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20676,7 +21069,7 @@ function getReactRootElementInContainer(container) {
 
 module.exports = getReactRootElementInContainer;
 
-},{}],135:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20713,7 +21106,7 @@ function getTextContentAccessor() {
 
 module.exports = getTextContentAccessor;
 
-},{"./ExecutionEnvironment":35}],136:[function(require,module,exports){
+},{"./ExecutionEnvironment":37}],138:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20753,7 +21146,7 @@ function getUnboundedScrollPosition(scrollable) {
 
 module.exports = getUnboundedScrollPosition;
 
-},{}],137:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20786,7 +21179,7 @@ function hyphenate(string) {
 
 module.exports = hyphenate;
 
-},{}],138:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -20827,7 +21220,7 @@ function hyphenateStyleName(string) {
 
 module.exports = hyphenateStyleName;
 
-},{"./hyphenate":137}],139:[function(require,module,exports){
+},{"./hyphenate":139}],141:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -20941,7 +21334,7 @@ function instantiateReactComponent(element, parentCompositeType) {
 module.exports = instantiateReactComponent;
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./ReactEmptyComponent":68,"./ReactLegacyElement":75,"./ReactNativeComponent":80,"./warning":159,"_process":12}],140:[function(require,module,exports){
+},{"./ReactElement":68,"./ReactEmptyComponent":70,"./ReactLegacyElement":77,"./ReactNativeComponent":82,"./warning":161,"_process":14}],142:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -20998,7 +21391,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 module.exports = invariant;
 
 }).call(this,require('_process'))
-},{"_process":12}],141:[function(require,module,exports){
+},{"_process":14}],143:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21063,7 +21456,7 @@ function isEventSupported(eventNameSuffix, capture) {
 
 module.exports = isEventSupported;
 
-},{"./ExecutionEnvironment":35}],142:[function(require,module,exports){
+},{"./ExecutionEnvironment":37}],144:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21091,7 +21484,7 @@ function isNode(object) {
 
 module.exports = isNode;
 
-},{}],143:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21135,7 +21528,7 @@ function isTextInputElement(elem) {
 
 module.exports = isTextInputElement;
 
-},{}],144:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21160,7 +21553,7 @@ function isTextNode(object) {
 
 module.exports = isTextNode;
 
-},{"./isNode":142}],145:[function(require,module,exports){
+},{"./isNode":144}],147:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21201,7 +21594,7 @@ function joinClasses(className/*, ... */) {
 
 module.exports = joinClasses;
 
-},{}],146:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -21256,7 +21649,7 @@ var keyMirror = function(obj) {
 module.exports = keyMirror;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],147:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],149:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21292,7 +21685,7 @@ var keyOf = function(oneKeyObj) {
 
 module.exports = keyOf;
 
-},{}],148:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21345,7 +21738,7 @@ function mapObject(object, callback, context) {
 
 module.exports = mapObject;
 
-},{}],149:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21379,7 +21772,7 @@ function memoizeStringOnly(callback) {
 
 module.exports = memoizeStringOnly;
 
-},{}],150:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -21413,7 +21806,7 @@ function monitorCodeUse(eventName, data) {
 module.exports = monitorCodeUse;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],151:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],153:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -21453,7 +21846,7 @@ function onlyChild(children) {
 module.exports = onlyChild;
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./invariant":140,"_process":12}],152:[function(require,module,exports){
+},{"./ReactElement":68,"./invariant":142,"_process":14}],154:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21481,7 +21874,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
 module.exports = performance || {};
 
-},{"./ExecutionEnvironment":35}],153:[function(require,module,exports){
+},{"./ExecutionEnvironment":37}],155:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21509,7 +21902,7 @@ var performanceNow = performance.now.bind(performance);
 
 module.exports = performanceNow;
 
-},{"./performance":152}],154:[function(require,module,exports){
+},{"./performance":154}],156:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21587,7 +21980,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
 module.exports = setInnerHTML;
 
-},{"./ExecutionEnvironment":35}],155:[function(require,module,exports){
+},{"./ExecutionEnvironment":37}],157:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21631,7 +22024,7 @@ function shallowEqual(objA, objB) {
 
 module.exports = shallowEqual;
 
-},{}],156:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 /**
  * Copyright 2013-2014, Facebook, Inc.
  * All rights reserved.
@@ -21669,7 +22062,7 @@ function shouldUpdateReactComponent(prevElement, nextElement) {
 
 module.exports = shouldUpdateReactComponent;
 
-},{}],157:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -21741,7 +22134,7 @@ function toArray(obj) {
 module.exports = toArray;
 
 }).call(this,require('_process'))
-},{"./invariant":140,"_process":12}],158:[function(require,module,exports){
+},{"./invariant":142,"_process":14}],160:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2014, Facebook, Inc.
@@ -21924,7 +22317,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 module.exports = traverseAllChildren;
 
 }).call(this,require('_process'))
-},{"./ReactElement":66,"./ReactInstanceHandles":74,"./invariant":140,"_process":12}],159:[function(require,module,exports){
+},{"./ReactElement":68,"./ReactInstanceHandles":76,"./invariant":142,"_process":14}],161:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014, Facebook, Inc.
@@ -21969,10 +22362,10 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = warning;
 
 }).call(this,require('_process'))
-},{"./emptyFunction":121,"_process":12}],160:[function(require,module,exports){
+},{"./emptyFunction":123,"_process":14}],162:[function(require,module,exports){
 module.exports = require('./lib/React');
 
-},{"./lib/React":42}],161:[function(require,module,exports){
+},{"./lib/React":44}],163:[function(require,module,exports){
 /*
 * Copyright (c) 2015, Leon Sorokin
 * All rights reserved. (MIT Licensed)
@@ -22908,7 +23301,7 @@ module.exports = require('./lib/React');
 	}
 
 }).call(this);
-},{}],162:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -23991,7 +24384,7 @@ request.put = function(url, data, fn){
 
 module.exports = request;
 
-},{"emitter":163,"reduce":164}],163:[function(require,module,exports){
+},{"emitter":165,"reduce":166}],165:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -24157,7 +24550,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],164:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 
 /**
  * Reduce `arr` with `fn`.

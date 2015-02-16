@@ -29,14 +29,23 @@ var InkLoader = {
 
     Object.keys(data).forEach(function(k) {
       var entry = data[k],
-          H = entry.H,
+          // H = entry.H,
           S = entry.S,
           L = entry.L;
       enrich(entry);
-      if(L < 0.08) { darks.push(entry); }
-      else if(L < 0.15 && S < 0.3) { darks.push(entry); }
-      else if(S < 0.09 || (S < 0.2 && L < 0.25)) { neutrals.push(entry); }
-      else { colors.push(entry); }
+      if(L < 0.08) {
+        entry.darks = true;
+        darks.push(entry);
+      } else if(L < 0.15 && S < 0.3) {
+        entry.darks = true;
+        darks.push(entry);
+      } else if(S < 0.09 || (S < 0.2 && L < 0.25)) {
+        entry.neutrals = true;
+        neutrals.push(entry);
+      } else {
+        entry.colors = true;
+        colors.push(entry);
+      }
       inks.push(entry);
     });
 

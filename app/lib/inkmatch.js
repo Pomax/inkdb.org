@@ -1,43 +1,57 @@
 var RGBQuant = require("rgbquant");
 var JpegImage = require("./jpg.js");
+var temperature = require("../lib/temperature");
 
-module.exports = function inkmatch(dataURI, callback) {
+var opts = {
+  colors: 10,
+  boxSize: [200,200],
+  initColors: 256
+};
 
-  function performAnalysis(cvs) {
-    var opts = {
-      colors: 10,
-      boxSize: [200,200],
-      initColors: 256
-    };
+module.exports = function inkmatch(dataURI, Kelvin, callback) {
+  if(typeof Kelvin === "function") {
+    callback = Kelvin;
+    Kelvin = false;
+  }
+
+  function performAnalysis(data, width, height) {
+    data = data.data ? data.data : data;
+
+    if (Kelvin) {
+      var temp = temperature(Kelvin);
+      for(var i=0, l=data.length; i<l; i+=4) {
+        data[i]   = (data[i]   + temp[0])/2;
+        data[i+1] = (data[i+1] + temp[1])/2;
+        data[i+2] = (data[i+2] + temp[2])/2;
+        data[i+3] = 255;
+      }
+    }
+
     var quantizer = new RGBQuant(opts);
-    var img = new Image();
-    img.onload = function() {
-      quantizer.sample(img);
-      var threshold = 150;
-      var neutral = 15;
-      var pal = quantizer.palette(true, true).filter(function(rgb) {
-        if (rgb[0]<threshold && rgb[1]<threshold && rgb[2]<threshold) return true;
-        var d1 = Math.abs(rgb[0] - rgb[1]);
-        var d2 = Math.abs(rgb[1] - rgb[2]);
-        var d3 = Math.abs(rgb[2] - rgb[0]);
-        return !(d1<neutral && d2<neutral && d3<neutral);
-      });
-      callback(pal);
-    };
-    img.src = cvs.toDataURL("image/png");
+    quantizer.sample(data, width);
+    callback(false, {
+      pal: quantizer.palette(true, true),
+      data: data,
+      crushed: quantizer.reduce(data),
+      width: width,
+      height: height
+    });
   }
 
   function analyse(dataURI) {
     var jpeg = new JpegImage();
     jpeg.onload = function() {
       var cvs = document.createElement("canvas");
-      cvs.width = jpeg.width;
-      cvs.height = jpeg.height;
+      var w = jpeg.width;
+      var h = jpeg.height;
+      cvs.width = w;
+      cvs.height = h;
       var ctx = cvs.getContext("2d");
-      var imageData = ctx.getImageData(0,0,jpeg.width,jpeg.height);
+      var imageData = ctx.getImageData(0,0,w,h);
       jpeg.copyToImageData(imageData);
       ctx.putImageData(imageData, 0, 0);
-      performAnalysis(cvs);
+      var data = ctx.getImageData(0,0,w,h);
+      setTimeout(function() { performAnalysis(data,w,h); },250);
     };
     jpeg.load(dataURI);
   }

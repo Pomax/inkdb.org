@@ -78,7 +78,7 @@ var InkListing = React.createClass({
     var position = document.querySelector(".selected.ink.swatch");
     if(position) {
       position = position.getBoundingClientRect().top - 100;
-      scrollTo(0, position)
+      scrollTo(0, position);
     }
   },
 

@@ -16,7 +16,7 @@ var InkDB = React.createClass({
     return {
       currentEntry: {},
       inks: {all:[], darks: [], neutrals: [], colors: []},
-      mode: "grid"
+      mode: "match"
     };
   },
 
@@ -47,7 +47,6 @@ var InkDB = React.createClass({
       case "match":
         maincontent = <InkMatch {...props} />;
         break;
-      case "grid":
       default:
         maincontent = <InkListing {...props} />;
     }
@@ -64,8 +63,10 @@ var InkDB = React.createClass({
       mode: mode
     }, function() {
       this.refs.selector.setMode(mode);
-      if(callback) callback();
-    })
+      if(callback) {
+        callback();
+      }
+    });
   },
 
   setCurrentEntry: function(entry) {

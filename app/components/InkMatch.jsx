@@ -10,7 +10,8 @@ var InkMatch = React.createClass({
       status: "Drop an image here.",
       pal: [],
       matches: [],
-      datauri: ""
+      datauri: "",
+      showOriginal: true
     };
   },
 
@@ -19,12 +20,12 @@ var InkMatch = React.createClass({
 
     var pal = this.state.pal
       .sort(function(a,b) {
-        a = chroma(a[0],a[1],a[2],'rgb').hsl()[0];
-        b = chroma(b[0],b[1],b[2],'rgb').hsl()[0];
+        a = chroma(a[0],a[1],a[2],"rgb").hsl()[0];
+        b = chroma(b[0],b[1],b[2],"rgb").hsl()[0];
         return a-b;
       }).
       map(function(rgb) {
-        var key = rgb.join('');
+        var key = rgb.join("");
         rgb = { r: rgb[0], g: rgb[1], b: rgb[2] };
         var style = {
           background: "rgb("+rgb.r+","+rgb.g+","+rgb.b+")"
@@ -35,7 +36,7 @@ var InkMatch = React.createClass({
         return <span className="ink match"
                      style={style}
                      key={key}
-                     onClick={findMatch}/>
+                     onClick={findMatch}/>;
       });
 
     var matches = this.state.matches
@@ -55,14 +56,20 @@ var InkMatch = React.createClass({
         </div>;
      });
 
+    var src = this.state.showOriginal ? this.state.datauri : this.state.crushed;
+
     return (
       <div className="inkmatch">
         <header>
           <h1>Drag-and-drop a file to start color-matching</h1>
         </header>
         <div className="matching">
-          <Dropzone handler={this.fileHandler}>
-            { this.state.datauri ? <img src={this.state.datauri}/> : "" }
+          <Dropzone className="dropzone" onDrop={this.fileHandler}>
+            { this.state.datauri ? (
+              <img src={src}
+                   onMouseOver={this.showCrushed}
+                   onMouseOut={this.showOriginal} />
+             ): "" }
             <span>{this.state.status}</span>
           </Dropzone>
           { pal.length ? <div className="palette">{pal}</div> : "" }
@@ -77,8 +84,20 @@ var InkMatch = React.createClass({
     );
   },
 
+  showOriginal: function() {
+    this.setState({
+      showOriginal: true
+    });
+  },
+
+  showCrushed: function() {
+    this.setState({
+      showOriginal: false
+    });
+  },
+
   findMatch: function(rgb) {
-    var ref = chroma(rgb.r, rgb.g, rgb.b, 'rgb');
+    var ref = chroma(rgb.r, rgb.g, rgb.b, "rgb");
     this.props.alignInks(ref);
     this.props.inks.all.sort(function(a,b) {
       a = a.distance;
@@ -90,33 +109,43 @@ var InkMatch = React.createClass({
     });
   },
 
-  fileHandler: function(file) {
-    var self = this;
-    self.setState({
+  fileHandler: function(files) {
+    // console.log("receiving", { name: file.name, type: file.type, size: file.size });
+    this.setState({
       status: "Uploading...",
       datauri: ""
-    });
-
-    // console.log("receiving", {
-    //   name: file.name,
-    //   type: file.type,
-    //   size: file.size
-    // });
-
-    var reader = new FileReader();
-    reader.addEventListener("loadend", function (e) {
-      console.log("done");
-      self.setState({ status: "Processing..." });
-      data = this.result;
-      inkmatch(data, function(result) {
+    }, function () {
+      var self = this;
+      var file = files[0];
+      var reader = new FileReader();
+      reader.addEventListener("loadend", function(e) {
         self.setState({
-          status: "Pick a found color, or try with another image.",
-          pal: result,
-          datauri: data
+          status: "Processing..."
         });
+        inkmatch(this.result, self.setInkMatch);
       });
+      setTimeout(function() { reader.readAsDataURL(file); },250);
     });
-    reader.readAsDataURL(file);
+  },
+
+  setInkMatch: function(err, result) {
+    this.setState({
+      status: "Pick a found color, or try with another image.",
+      pal: result.pal,
+      datauri: this.toImageSource(result.data, result.width, result.height),
+      crushed: this.toImageSource(result.crushed, result.width, result.height)
+    }, function() { console.log(); });
+  },
+
+  toImageSource: function(data, w, h) {
+    var cvs = document.createElement("canvas");
+    cvs.width = w;
+    cvs.height = h;
+    var ctx = cvs.getContext("2d");
+    var imgdata = ctx.getImageData(0,0,w,h);
+    for(var i=data.length-1; i>=0; i--) { imgdata.data[i] = data[i]; }
+    ctx.putImageData(imgdata,0,0);
+    return cvs.toDataURL("image/png");
   }
 
 });

@@ -13,15 +13,18 @@ gulp.task('bundle-app', function() {
   var browserify = require('browserify');
   var transform = require('vinyl-transform');
   var reactify = require('reactify');
+  var to5ify = require("6to5ify");
   var source = require('vinyl-source-stream');
 
-//  var donottouch = require('browserify-global-shim').configure({
-//    'react': 'React'
+//  // Make sure we point to the dist/react.min.js version of react
+//  var replacements = require('browserify-global-shim').configure({
+//    'react': 'require("react/dist/react.min")'
 //  });
 
   return browserify(cwd + '/components/app.jsx')
+    .transform(to5ify)
     .transform(reactify)
-//    .transform(donottouch)
+//    .transform(replacements)
     .bundle()
     .pipe(source('app.js'))
     .pipe(gulp.dest(cwd + '/build/'));
