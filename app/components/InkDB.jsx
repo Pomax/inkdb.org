@@ -16,7 +16,7 @@ var InkDB = React.createClass({
     return {
       currentEntry: {},
       inks: {all:[], darks: [], neutrals: [], colors: []},
-      mode: "match"
+      mode: "grid"
     };
   },
 
