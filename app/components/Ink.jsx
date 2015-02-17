@@ -14,8 +14,11 @@ var Ink = React.createClass({
         c = this.state.L < 0.3 ? "white" : "black",
         bstyle = { background: "rgb("+r+","+g+","+b+")", color: c },
         imgSrc = "inks/images/" + this.state.images + "/crop.png",
-        className = "ink swatch" + (this.state.selected ? " selected" : "");
-
+        className = "ink swatch" + (this.state.selected ? " selected" : ""),
+        buy = "http://www.gouletpens.com/search?query=" +
+                    this.state.company.replace(/ /g,"+") +
+                    "+" +
+                    this.state.inkname.replace(/ /g,"+");
     return (
       <div className={className} onClick={this.inkClicked}>
         <div className="ink color preview" style={bstyle}>
@@ -24,8 +27,19 @@ var Ink = React.createClass({
         </div>
         <span className="company">{this.state.company}</span>
         <span className="inkname">{this.state.inkname}</span>
+        <div className="buy">
+          <a className="ion-android-cart"
+             href={buy}
+             target="_blank"
+             title="Buy this ink at gouletpens.com"
+             onClick={this.stopClick} />
+        </div>
       </div>
     );
+  },
+
+  stopClick: function(evt) {
+    evt.stopPropagation();
   },
 
   inkClicked: function(evt) {

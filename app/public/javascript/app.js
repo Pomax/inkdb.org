@@ -234,8 +234,8 @@ var Ink = React.createClass({
         c = this.state.L < 0.3 ? "white" : "black",
         bstyle = { background: "rgb(" + r + "," + g + "," + b + ")", color: c },
         imgSrc = "inks/images/" + this.state.images + "/crop.png",
-        className = "ink swatch" + (this.state.selected ? " selected" : "");
-
+        className = "ink swatch" + (this.state.selected ? " selected" : ""),
+        buy = "http://www.gouletpens.com/search?query=" + this.state.company.replace(/ /g, "+") + "+" + this.state.inkname.replace(/ /g, "+");
     return React.createElement(
       "div",
       { className: className, onClick: this.inkClicked },
@@ -254,8 +254,21 @@ var Ink = React.createClass({
         "span",
         { className: "inkname" },
         this.state.inkname
+      ),
+      React.createElement(
+        "div",
+        { className: "buy" },
+        React.createElement("a", { className: "ion-android-cart",
+          href: buy,
+          target: "_blank",
+          title: "Buy this ink at gouletpens.com",
+          onClick: this.stopClick })
       )
     );
+  },
+
+  stopClick: function (evt) {
+    evt.stopPropagation();
   },
 
   inkClicked: function (evt) {

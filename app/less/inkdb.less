@@ -179,6 +179,7 @@ body {
   }
 
   .swatch {
+    position: relative;
     display: inline-block;
     width: 22vw;
     height: 8em;
@@ -206,7 +207,25 @@ body {
     }
 
     .company + .inkname {
-      margin-left: 0.25em;
+      margin-left: 1em;
+      font-size: 80%;
+    }
+
+    .buy {
+      position: absolute;
+      z-index: 10;
+      top: ~"calc(60% - 1em)";
+      left: 0;
+      background: white;
+      width: 1em;
+      height: 1em;
+      line-height: 1;
+      padding: 3px 5px 0 2px;
+      border-radius: 0 0.3em 0 0;
+
+      a, a:focus, a:hover, a:active {
+        color: #666
+      }
     }
   }
 }
