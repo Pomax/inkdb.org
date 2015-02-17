@@ -1,6 +1,5 @@
 var React = require("react");
 var Dropzone = require("react-dropzone");
-var inkmatch = require("../lib/inkmatch");
 var ImageEditor = require("./ImageEditor.jsx");
 
 var matchTypes = [
@@ -126,21 +125,22 @@ var InkMatch = React.createClass({
         var file = files[0];
         var reader = new FileReader();
         reader.addEventListener("loadend", function(e) {
-          self.setState({
-            status: "Processing..."
-          });
-          inkmatch(this.result, self.setInkMatch);
+          self.setInkMatch(this.result);
         });
         setTimeout(function() { reader.readAsDataURL(file); },50);
       }
     );
   },
 
-  setInkMatch: function(err, result) {
+  setInkMatch: function(datauri) {
     this.setState({
       status: "Adjust the white balance as needed, then click 'analyse'.",
     }, function() {
-      this.refs.editor.setData(result);
+      var img = new Image();
+      img.onload = function() {
+        this.refs.editor.setData(img);
+      }.bind(this);
+      img.src = datauri;
     });
   }
 

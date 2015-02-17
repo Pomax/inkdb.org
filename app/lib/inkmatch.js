@@ -1,5 +1,4 @@
 var RGBQuant = require("rgbquant");
-var JpegImage = require("./jpg.js");
 var chroma = require("chroma-js");
 
 var opts = {
@@ -8,7 +7,7 @@ var opts = {
   initColors: 256
 };
 
-module.exports = function inkmatch(dataURI, callback) {
+module.exports = function inkmatch(data, w, h, callback) {
 
   function performAnalysis(data, width, height) {
     data = data.data ? data.data : data;
@@ -26,23 +25,5 @@ module.exports = function inkmatch(dataURI, callback) {
     });
   }
 
-  function analyse(dataURI) {
-    var jpeg = new JpegImage();
-    jpeg.onload = function() {
-      var w = 500;
-      var h = (jpeg.height * (500/jpeg.width))|0;
-      var jpegdata = jpeg.getData(w,h);
-      var clamped = new Uint8ClampedArray(w*h*4);
-      for(var i=0, l=jpegdata.length/3; i<l; i++) {
-        clamped[4*i] = jpegdata[3*i];
-        clamped[4*i+1] = jpegdata[3*i+1];
-        clamped[4*i+2] = jpegdata[3*i+2];
-        clamped[4*i+3] = 255;
-      }
-      setTimeout(function() { performAnalysis(clamped,w,h); },250);
-    };
-    jpeg.load(dataURI);
-  }
-
-  analyse(dataURI);
+  setTimeout(function() { performAnalysis(data, w, h); }, 25);
 };

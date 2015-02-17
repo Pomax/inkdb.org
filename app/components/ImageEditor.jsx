@@ -15,7 +15,6 @@ var ImageEditor = React.createClass({
   },
 
   reset: function() {
-    this.refs.base.getDOMNode().src='';
     var cvs = this.refs.canvas.getDOMNode();
     cvs.width = 0;
     cvs.height = 0;
@@ -25,7 +24,6 @@ var ImageEditor = React.createClass({
   render: function() {
     if (!this.state.data) {
       return <div className="imageeditor">
-        <img ref="base" hidden="hidden"/>
         <canvas ref="canvas"></canvas>
       </div>;
     }
@@ -33,7 +31,6 @@ var ImageEditor = React.createClass({
     else if (!this.state.processing && this.state.pal.length === 0) {
       var temperatures = this.formTemperatureGuage();
       return <div className="imageeditor">
-        <img ref="base" hidden="hidden"/>
         <canvas ref="canvas"></canvas>
         <div className="temperatures">{temperatures}</div>
         <button onClick={this.analyse}>Analyse</button>
@@ -43,7 +40,6 @@ var ImageEditor = React.createClass({
     else {
       var pal = this.formPalette();
       return <div className="imageeditor">
-        <img ref="base" hidden="hidden"/>
         <canvas ref="canvas"></canvas>
         <div className="palette">{pal}</div>
       </div>;
@@ -95,7 +91,11 @@ var ImageEditor = React.createClass({
     var cvs = this.refs.canvas.getDOMNode();
     this.setState({ processing: true }, function() {
       this.props.analysisStarted();
-      inkmatch(cvs.toDataURL("image/jpeg"), function(err, result) {
+      var w = 500;
+      var h = cvs.height;
+      var ctx = cvs.getContext("2d");
+      var imgData = ctx.getImageData(0,0,w,h);
+      inkmatch(imgData.data, w, h, function(err, result) {
         self.setState({
           pal: result.pal,
           processing: false
@@ -109,13 +109,12 @@ var ImageEditor = React.createClass({
     return function(evt) {
       this.setState({ temperature: T }, function() {
         var cvs = this.refs.canvas.getDOMNode();
+        cvs.width = 500;
+        cvs.height = this.state.height * 500/this.state.width;
         var ctx = cvs.getContext("2d");
-        if(cvs.width !== this.state.width || cvs.height !== this.state.height) {
-          cvs.width = this.state.width;
-          cvs.height = this.state.height;
-        }
-        var imgdata = ctx.getImageData(0,0,cvs.width,cvs.height);
-        var data = this.state.data;
+        ctx.drawImage(this.state.data, 0,0, 500, cvs.height);
+        var imgdata = ctx.getImageData(0,0, 500, cvs.height);
+        var data = imgdata.data;
         var temp = temperature(this.state.temperature);
         for(var i=0; i<data.length; i+=4) {
           imgdata.data[i]   = data[i]   + (temp[0] - 255);
@@ -128,13 +127,12 @@ var ImageEditor = React.createClass({
     }.bind(this);
   },
 
-  setData: function(result) {
-    var w = result.width,
-        h = result.height;
+  setData: function(img) {
+    var w = img.width, h = img.height;
     this.setState({
       width: w,
       height: h,
-      data: result.data
+      data: img
     }, function() {
       this.changeTemperature(this.state.temperature)();
     });

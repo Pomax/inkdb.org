@@ -33,12 +33,12 @@ body {
   margin: 0 auto 1em;
   height: 2em;
   line-height: 2;
-  background: #CCC;
+  background: #FFF;
   color: #444;
 
   box-shadow:
     inset -2px -2px rgba(0,0,0,0.2),
-    inset 2px 2px rgba(250,250,250,0.2);
+    inset 2px 2px rgba(0,0,0,0.2);
 
   &:active {
     box-shadow: none;
@@ -97,7 +97,8 @@ body {
   .imageeditor {
     canvas {
       display: block;
-      width: 500px;
+      max-width: 500px;
+      max-height: 40vh;
       margin: auto;
       border: 1px solid black;
     }
