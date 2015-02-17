@@ -4261,7 +4261,13 @@ process.umask = function() { return 0; };
 },{}],18:[function(require,module,exports){
 (function() {
 
+  var RATE_LIMIT = 25;
+
   var ComponentVisibilityMixin = {
+
+    setComponentVisbilityRateLimit: function(milliseconds) {
+      RATE_LIMIT = milliseconds;
+    },
 
     getInitialState: function() {
       return { visible: false };
@@ -4329,9 +4335,24 @@ process.umask = function() { return 0; };
      * immediately check whether this element is already visible or not.
      */
     enableVisbilityHandling: function(checkNow) {
-      document.addEventListener("scroll", this.checkComponentVisibility);
-      window.addEventListener("resize", this.checkComponentVisibility);
-      if (checkNow) { this.checkComponentVisibility(); }
+      this._rcv_fn = function() {
+        if(this._rcv_lock) {
+          this._rcv_schedule = true;
+          return;
+        }
+        this._rcv_lock = true;
+        this.checkComponentVisibility();
+        setTimeout(function() {
+          this._rcv_lock = false;
+          if (this._rcv_schedule) {
+            this._rcv_schedule = false;
+            this.checkComponentVisibility();
+          }
+        }.bind(this), RATE_LIMIT);
+      }.bind(this);
+      document.addEventListener("scroll", this._rcv_fn);
+      window.addEventListener("resize", this._rcv_fn);
+      if (checkNow) { this._rcv_fn(); }
     },
 
     /**
@@ -4341,8 +4362,9 @@ process.umask = function() { return 0; };
      * static assets on first-time-in-view-ness (that's a word, right?).
      */
     disableVisbilityHandling: function() {
-      document.removeEventListener("scroll", this.checkComponentVisibility);
-      window.removeEventListener("resize", this.checkComponentVisibility);
+      document.removeEventListener("scroll", this._rcv_fn);
+      window.removeEventListener("resize", this._rcv_fn);
+      this._rcv_fn = false;
     }
   };
 
