@@ -18,7 +18,7 @@ var InkCloud = React.createClass({
       <div className="inkcloud">
         <header>
           <h1>Color distances in Fountain Pen land</h1>
-          <p>The closer a color is to the central color, the closer they are in L*a*b space.</p>
+          <p>Click a colour to bring it into focus, and click it again to view it in the colour grid.</p>
           <InkLabel ref="info"></InkLabel>
           {this.getToggles()}
         </header>
@@ -29,7 +29,7 @@ var InkCloud = React.createClass({
 
   getToggles: function() {
     var toggles = ["darks", "neutrals", "colors"].map(s => {
-      return <span className="toggle" onClick={this.toggle(s)}>
+      return <span className="toggle" onClick={this.toggle(s)} key={s}>
         <input type="checkbox" checked={this.state[s]} /> {s}
       </span>;
     });
@@ -99,10 +99,9 @@ var InkCloud = React.createClass({
           transform: "translate(50vw, 45vh) translate("+x+"vw, "+y+"vh) scale("+(xscale)+")"
         },
         onMouseOver: showInfo(entry),
-        onClick: realign(entry),
-        key: entry.company + entry.inkname
+        onClick: realign(entry)
       };
-      return <div {...props}></div>;
+      return <div {...props} key={entry.company + entry.inkname}></div>;
     });
   },
 

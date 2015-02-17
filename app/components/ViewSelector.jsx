@@ -11,7 +11,7 @@ var ViewSelector = React.createClass({
 
   render: function() {
     var options = this.state.views.map(function(e) {
-      return <option value={e}>{e} layout</option>;
+      return <option value={e} key={e}>{e} layout</option>;
     });
     return (
       <select className="viewselector" value={this.state.view} onChange={this.viewModeChanged}>

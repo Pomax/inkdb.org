@@ -29,32 +29,27 @@ body {
 
 .dropzone {
   display: block;
-  width: 100px;
-  height: 100px;
-  margin: auto;
-  border: 3px dashed black;
-  padding: 10px;
+  width: 500px;
+  margin: 0 auto 1em;
+  height: 2em;
+  line-height: 2;
+  background: #CCC;
+  color: #444;
+
+  box-shadow:
+    inset -2px -2px rgba(0,0,0,0.2),
+    inset 2px 2px rgba(250,250,250,0.2);
 
   &:active {
-    background: lightgrey;
-  }
-
-  img {
-    display: inline-block;
-    max-height: 100%;
-    max-width: ~"calc(100% - 22em)";
-    border: 1px solid black;
-    vertical-align: middle;
-  }
-
-  span {
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 0.25em;
+    box-shadow: none;
   }
 }
 
 .matching {
+  .matchlegend {
+    font-size: 75%;
+    font-variant: small-caps;
+  }
   .palette {
     margin-top: 2em;
   }
@@ -64,19 +59,21 @@ body {
     margin: auto;
   }
   .matches {
-    text-align: left;
-    width: 50%;
-    margin: auto;
-    margin-top: 2em;
-
     list-style: none;
+    margin: 2em auto;
+    padding: 0;
+    text-align: left;
+    text-indent: 0;
+    width: 500px;
 
     .match {
       .color {
         width: 3em;
-        height: 1em;
+        height: 2em;
         display: inline-block;
         margin-right: 0.5em;
+        margin-bottom: -0.3em;
+        border-radius: 0 0.5em 0 0;
         cursor: pointer;
       }
 
@@ -84,20 +81,37 @@ body {
       margin-bottom: 0.5em;
     }
   }
+  .matchtype {
+    &:before {
+      content: "\"";
+    }
+    &+.matchtype {
+      &:before {
+        content: ", \"";
+      }
+    }
+    &:after {
+      content: "\"";
+    }
+  }
   .imageeditor {
     canvas {
       display: block;
-      max-width: 400px;
-      max-height: 400px;
+      width: 500px;
       margin: auto;
+      border: 1px solid black;
     }
+
     .temperatures {
       display: inline-block;
       border: 1px solid black;
+      width: 500px - 2px;
+      margin: 0.5em 0;
+
       .temperature {
         display: inline-block;
         height: 1em;
-        width: 0.4em;
+        width: 1%;
         box-sizing: border-box;
         &.selected {
           border: solid black;
@@ -114,18 +128,27 @@ body {
       display: block;
       width: 10em;
       margin: auto;
+      box-shadow:
+        inset -1px -1px rgba(0,0,0,0.2),
+        inset 1px 1px rgba(250,250,250,0.2);
+      &:active {
+        box-shadow: none;
+      }
       &[hidden] {
         opacity: 0.5;
       }
     }
-    .pal {
-      width: 3em;
-      height: 2em;
-      display: inline-block;
-      margin: 2px;
-      border-radius: 0.25em;
-      border: 1px solid grey;
-      cursor: pointer;
+    .palette {
+      margin: 1em 0;
+
+      .pal {
+        width: 3em;
+        height: 2em;
+        display: inline-block;
+        margin: 2px;
+        border: none;
+        cursor: pointer;
+      }
     }
   }
 }

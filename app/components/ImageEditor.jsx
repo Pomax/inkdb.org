@@ -6,17 +6,71 @@ var ImageEditor = React.createClass({
 
   getInitialState: function() {
     return {
-      temperature: 6500,
-      pal: [],
       colorsonly: false,
-      processing: false
+      data: false,
+      pal: [],
+      processing: false,
+      temperature: 6500
     };
   },
 
+  reset: function() {
+    this.refs.base.getDOMNode().src='';
+    var cvs = this.refs.canvas.getDOMNode();
+    cvs.width = 0;
+    cvs.height = 0;
+    this.setState(this.getInitialState());
+  },
+
   render: function() {
+    if (!this.state.data) {
+      return <div className="imageeditor">
+        <img ref="base" hidden="hidden"/>
+        <canvas ref="canvas"></canvas>
+      </div>;
+    }
+
+    else if (!this.state.processing && this.state.pal.length === 0) {
+      var temperatures = this.formTemperatureGuage();
+      return <div className="imageeditor">
+        <img ref="base" hidden="hidden"/>
+        <canvas ref="canvas"></canvas>
+        <div className="temperatures">{temperatures}</div>
+        <button onClick={this.analyse}>Analyse</button>
+      </div>;
+    }
+
+    else {
+      var pal = this.formPalette();
+      return <div className="imageeditor">
+        <img ref="base" hidden="hidden"/>
+        <canvas ref="canvas"></canvas>
+        <div className="palette">{pal}</div>
+      </div>;
+    }
+  },
+
+  formPalette: function() {
+    return this.state.pal.filter(color => {
+      if(this.state.colorsonly) {
+        var hsl = color.hsl(), s = hsl[1], l = hsl[2];
+        return s > 0.15 && l > 0.3;
+      }
+      return true;
+    }).map((v,idx) => {
+      var hsl = v.hsl();
+      var style = {
+        backgroundColor: "hsl("+(hsl[0]|0)+","+((100*hsl[1])|0)+"%,"+((100*hsl[2])|0)+"%)"
+      };
+      var key = hsl.join("") + idx;
+      return <button className="pal" style={style} onClick={this.listMatches(v)} key={key} />;
+    });
+  },
+
+  formTemperatureGuage: function() {
     var temperatures = [];
-    for(var i=4000; i<9500; i+=50) { temperatures.push(i); }
-    temperatures = temperatures.map(T => {
+    for(var i=4200; i<9200; i+=50) { temperatures.push(i); }
+    return temperatures.map(T => {
       var temp = temperature(T);
       var style = {
         backgroundColor: "rgb("+(temp[0]|0)+","+(temp[1]|0)+","+(temp[2]|0)+")",
@@ -25,30 +79,8 @@ var ImageEditor = React.createClass({
       if(T === this.state.temperature) {
         className += " selected";
       }
-      return <div className={className} style={style} onClick={this.changeTemperature(T)} title={T}/>;
+      return <div className={className} style={style} onClick={this.changeTemperature(T)} title={T} key={T}/>;
     });
-
-    var pal = this.state.pal.filter(color => {
-      if(this.state.colorsonly) {
-        var hsl = color.hsl(), s = hsl[1], l = hsl[2];
-        return s > 0.15 && l > 0.3;
-      }
-      return true;
-    }).map(v => {
-      var hsl = v.hsl();
-      var style = {
-        backgroundColor: "hsl("+(hsl[0]|0)+","+((100*hsl[1])|0)+"%,"+((100*hsl[2])|0)+"%)"
-      };
-      return <button className="pal" style={style} onClick={this.listMatches(v)} />;
-    });
-
-    return <div className="imageeditor">
-      <img ref="base" hidden="hidden"/>
-      <canvas ref="canvas"></canvas>
-      <div className="temperatures">{temperatures}</div>
-      <button hidden={this.state.processing} onClick={this.analyse}>Analyse</button>
-      <div>{pal}</div>
-    </div>;
   },
 
   listMatches: function(color) {
@@ -62,11 +94,13 @@ var ImageEditor = React.createClass({
     var self = this;
     var cvs = this.refs.canvas.getDOMNode();
     this.setState({ processing: true }, function() {
+      this.props.analysisStarted();
       inkmatch(cvs.toDataURL("image/jpeg"), function(err, result) {
         self.setState({
           pal: result.pal,
           processing: false
         });
+        self.props.analysisCompleted(result.pal);
       });
     });
   },

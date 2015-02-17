@@ -6,6 +6,13 @@ var InkListing = require("./InkListing.jsx");
 var InkCloud = require("./InkCloud.jsx");
 var InkMatch = require("./InkMatch.jsx");
 
+var modes = [
+  "grid",
+  "cloud",
+  "match",
+  "submit"
+];
+
 var InkDB = React.createClass({
 
   mixins: [
@@ -14,9 +21,7 @@ var InkDB = React.createClass({
 
   getInitialState: function() {
     return {
-      currentEntry: {},
-      inks: {all:[], darks: [], neutrals: [], colors: []},
-      mode: "grid"
+      mode: modes[0]
     };
   },
 
@@ -69,14 +74,6 @@ var InkDB = React.createClass({
     });
   },
 
-  setCurrentEntry: function(entry) {
-    this.state.currentEntry.selected = false;
-    entry.selected = true;
-    this.setState({
-      currentEntry: entry
-    });
-  },
-
   inkClicked: function(entry) {
     if(this.state.mode === "cloud" && entry.selected) {
       return this.switchMode("grid");
@@ -86,22 +83,6 @@ var InkDB = React.createClass({
     var self = this;
     this.switchMode("cloud", function() {
       self.setCurrentEntry(entry);
-    });
-  },
-
-  alignInks: function(ref) {
-    var inks = this.state.inks.all;
-    inks.forEach(function(entry) {
-      var local = chroma(entry.r, entry.g, entry.b, "rgb");
-      var rc = ref.lab();
-      var lc = local.lab();
-      var distance = Math.sqrt(
-        Math.pow(rc[0]-lc[0], 2) +
-        Math.pow(rc[1]-lc[1], 2) +
-        Math.pow(rc[2]-lc[2], 2)
-      );
-      entry.distance = distance;
-      entry.angle = Math.PI * (ref.hsl()[0] - local.hsl()[0])/180;
     });
   }
 

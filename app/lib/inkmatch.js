@@ -29,17 +29,17 @@ module.exports = function inkmatch(dataURI, callback) {
   function analyse(dataURI) {
     var jpeg = new JpegImage();
     jpeg.onload = function() {
-      var cvs = document.createElement("canvas");
-      var w = jpeg.width;
-      var h = jpeg.height;
-      cvs.width = w;
-      cvs.height = h;
-      var ctx = cvs.getContext("2d");
-      var imageData = ctx.getImageData(0,0,w,h);
-      jpeg.copyToImageData(imageData);
-      ctx.putImageData(imageData, 0, 0);
-      var data = ctx.getImageData(0,0,w,h);
-      setTimeout(function() { performAnalysis(data,w,h); },250);
+      var w = 500;
+      var h = (jpeg.height * (500/jpeg.width))|0;
+      var jpegdata = jpeg.getData(w,h);
+      var clamped = new Uint8ClampedArray(w*h*4);
+      for(var i=0, l=jpegdata.length/3; i<l; i++) {
+        clamped[4*i] = jpegdata[3*i];
+        clamped[4*i+1] = jpegdata[3*i+1];
+        clamped[4*i+2] = jpegdata[3*i+2];
+        clamped[4*i+3] = 255;
+      }
+      setTimeout(function() { performAnalysis(clamped,w,h); },250);
     };
     jpeg.load(dataURI);
   }
