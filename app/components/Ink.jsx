@@ -1,4 +1,5 @@
 var React = require("react");
+var InkProperties = require("./InkProperties.jsx");
 var Crop = require("./Crop.jsx");
 
 var Ink = React.createClass({
@@ -25,6 +26,7 @@ var Ink = React.createClass({
           {this.entryContent()}
           <Crop company={this.state.company} inkname={this.state.inkname} src={imgSrc} />
         </div>
+        <InkProperties ink={this.state} />
         <span className="company">{this.state.company}</span>
         <span className="inkname">{this.state.inkname}</span>
         <div className="buy">

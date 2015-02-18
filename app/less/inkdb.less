@@ -195,6 +195,95 @@ body {
       background: #F8F2D2;
     }
 
+    .properties {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1em;
+      
+
+      .property {
+        display: inline-block;
+        width: 10%;
+        height:1em;
+        background: #DDD;
+
+        &.drytime {
+          &[data-value='very slow']  { background: red; }
+          &[data-value=slow]         { background: orange; }
+          &[data-value=normal]       { background: yellow; }
+          &[data-value=fast]         { background: greenyellow; }
+          &[data-value='very fast']  { background: green; }
+        }
+
+        &.flow {
+          &[data-value='very thin']  { background: red; }
+          &[data-value=thin]         { background: orange; }
+          &[data-value=normal]       { background: yellow; }
+          &[data-value=thick]        { background: greenyellow; }
+          &[data-value='very thick'] { background: green; }
+        }
+
+        &.shading {
+          &[data-value=uniform]      { background: red; }
+          &[data-value='two tone']   { background: yellow; }
+          &[data-value=graduating]   { background: green; }
+        }
+
+        &.nibtype {
+          &[data-value=plain]        { background: red; }
+          &[data-value='semi-flex']  { background: yellow; }
+          &[data-value=flex]         { background: green; }
+        }
+
+        &.cost {
+          &[data-value='0-10']       { background: yellow; }
+          &[data-value='10-15']      { background: greenyellow; }
+          &[data-value='15-20']      { background: yellow; }
+          &[data-value='20-25']      { background: orange; }
+          &[data-value='25-30']      { background: red; }
+          &[data-value='30+']        { background: purple; }
+        }
+
+        &.fluorescence {
+          &[data-value=plain]        { background: yellow; }
+          &[data-value='mildly fluorescent'] { background: orange; }
+          &[data-value=fluorescent]  { background: red; }
+          &[data-value=highlighter]  { background: purple; }
+        }
+
+        &.solution {
+          &[data-value=dye]          { background: yellow; }
+          &[data-value=mixed]        { background: orange; }
+          &[data-value=paint]        { background: red; }
+        }
+
+        &.deposit {
+          &[data-value=clear]        { background: green; }
+          &[data-value=settling]     { background: yellow; }
+          &[data-value=intended]     { background: orange; }
+        }
+
+        &.rating {
+          &[data-value='0']          { background: #00f; }
+          &[data-value='1']          { background: #11f; }
+          &[data-value='2']          { background: #22f; }
+          &[data-value='3']          { background: #33f; }
+          &[data-value='4']          { background: #44f; }
+          &[data-value='5']          { background: #55f; }
+          &[data-value='6']          { background: #66f; }
+          &[data-value='7']          { background: #77f; }
+          &[data-value='8']          { background: #88f; }
+          &[data-value='9']          { background: #99f; }
+          &[data-value='10']         { background: #AAf; }
+        }
+
+
+      }
+    }
+
     .company {
       font-weight: normal;
       color: #666;
