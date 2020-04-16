@@ -15,7 +15,7 @@ var Ink = React.createClass({
         bstyle = { background: "rgb("+r+","+g+","+b+")", color: c },
         imgSrc = "inks/images/" + this.state.images + "/crop.png",
         className = "ink swatch" + (this.state.selected ? " selected" : ""),
-        buy = "http://www.gouletpens.com/search?query=" +
+        buy = "https://www.gouletpens.com/pages/search-results?q=" +
                     this.state.company.replace(/ /g,"+") +
                     "+" +
                     this.state.inkname.replace(/ /g,"+");
