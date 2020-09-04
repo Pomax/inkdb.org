@@ -26,7 +26,7 @@
     "jshint-jsx": "^0.4.0",
     "live-server": "^0.6.3",
     "page": "^1.5.0",
-    "react": "^0.12.2",
+    "react": "^16.13.1",
     "react-component-visibility": "*",
     "react-dropzone": "git://github.com/Pomax/react-dropzone#master",
     "react-onclickoutside": "^0.2.0",
